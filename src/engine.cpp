@@ -3,31 +3,63 @@
 #include <vector>
 #include <fstream>
 #include <cmath>
-#include <GL/freeglut.h> // Include FreeGLUT header
-
-struct Model {
-    std::string filename;
-};
-
-struct World {
-    struct Camera {
-        float posX, posY, posZ;
-        float lookAtX, lookAtY, lookAtZ;
-        float upX, upY, upZ;
-        float fov;
-        float nearClip;
-        float farClip;
-    } camera;
-
-    struct Window {
-        int width;
-        int height;
-    } window;
-
-    std::vector<Model> models;
-};
+#include <GL/freeglut.h>
+#include "../include/World.h"
 
 World world;
+
+float translateX = 0.0f;
+float translateZ = 0.0f;
+float rotateAngle = 0.0f;
+float scaleHeight = 1.0f;
+
+void referencial() {
+    glBegin(GL_LINES);
+		// X axis in red
+		glColor3f(1.0f, 0.0f, 0.0f);
+		glVertex3f(-100.0f, 0.0f, 0.0f);
+		glVertex3f( 100.0f, 0.0f, 0.0f);
+		// Y Axis in Green
+		glColor3f(0.0f, 1.0f, 0.0f);
+		glVertex3f(0.0f, -100.0f, 0.0f);
+		glVertex3f(0.0f, 100.0f, 0.0f);
+		// Z Axis in Blue
+		glColor3f(0.0f, 0.0f, 1.0f);
+		glVertex3f(0.0f, 0.0f, -100.0f);
+		glVertex3f(0.0f, 0.0f, 100.0f);
+    glEnd();
+
+}
+
+void keyboard_movement(unsigned char key, int x, int y) {
+    switch (key) {
+        case 'w':
+            translateZ += 0.2f;
+            break;
+        case 's':
+            translateZ -= 0.2f;
+            break;
+        case 'a':
+            translateX += 0.2f;
+            break;
+        case 'd':
+            translateX -= 0.2f;
+            break;
+        case 'q':
+            rotateAngle += 1.0f;
+            break;
+        case 'e':
+            rotateAngle -= 1.0f;
+            break;
+        case 'z':
+            scaleHeight *= 1.1f;
+            break;
+        case 'x':
+            scaleHeight *= 0.9f;
+            break;
+    }
+    glutPostRedisplay();
+}
 
 void parseXML(const char* filename, World& world) {
     tinyxml2::XMLDocument doc;
@@ -59,23 +91,22 @@ void parseXML(const char* filename, World& world) {
     }
 }
 
-// FreeGLUT display function
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f(1.0f, 1.0f, 1.0f);
 
-    glLoadIdentity(); // Reset the modelview matrix
+    glLoadIdentity();
 
-    // Set up camera
     gluLookAt(world.camera.posX, world.camera.posY, world.camera.posZ,
-              world.camera.lookAtX, world.camera.lookAtY, world.camera.lookAtZ,
-              world.camera.upX, world.camera.upY, world.camera.upZ);
+              0.0f, 0.0f, 0.0f,
+              0.0f, 1.0f, 0.0f);
 
-    // Apply projection
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(world.camera.fov, (float)world.window.width / world.window.height, world.camera.nearClip, world.camera.farClip);
+    gluPerspective(45.0f, (float)world.window.width / world.window.height, 1.0f, 1000.0f);
     glMatrixMode(GL_MODELVIEW);
+
+    referencial();
 
     // Render models
     for (const auto& model : world.models) {
@@ -99,15 +130,6 @@ void display() {
     glutSwapBuffers();
 }
 
-// FreeGLUT reshape function
-void reshape(int width, int height) {
-    glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(60.0, (double)width / height, 1.0, 1000.0); // Example FOV, near, and far
-    glMatrixMode(GL_MODELVIEW);
-}
-
 int main(int argc, char* argv[]) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -116,12 +138,11 @@ int main(int argc, char* argv[]) {
 
     glEnable(GL_DEPTH_TEST);
 
-    // Initialize camera and window parameters
-    world.camera = {0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 45.0f, 1.0f, 100.0f};
+    world.camera = {0.0f, 0.0f, 5.0f};
     world.window = {1920, 1080};
 
     glutDisplayFunc(display);
-    glutReshapeFunc(reshape);
+    glutKeyboardFunc(keyboard_movement);
 
     if (argc != 2) {
         std::cerr << "Usage: engine <config_file.xml>" << std::endl;

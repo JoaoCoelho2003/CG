@@ -1,0 +1,5 @@
+/home/jojocoelho/Desktop/3Ano2Semestre/CG/build/CMakeFiles/engine.dir
+/home/jojocoelho/Desktop/3Ano2Semestre/CG/build/CMakeFiles/generator.dir
+/home/jojocoelho/Desktop/3Ano2Semestre/CG/build/CMakeFiles/clean-all.dir
+/home/jojocoelho/Desktop/3Ano2Semestre/CG/build/CMakeFiles/edit_cache.dir
+/home/jojocoelho/Desktop/3Ano2Semestre/CG/build/CMakeFiles/rebuild_cache.dir
