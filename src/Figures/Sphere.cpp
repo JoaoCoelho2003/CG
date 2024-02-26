@@ -12,37 +12,105 @@ void Sphere::generateVertices() {
     texCoords.clear();
 
     // Generate vertices for the sphere
-    for (int i = 0; i <= stacks; ++i) {
-        float theta = static_cast<float>(i) / stacks * M_PI;
-        float sinTheta = sin(theta);
-        float cosTheta = cos(theta);
+    for (int i = 0; i < stacks; ++i) {
+        float theta1 = static_cast<float>(i) / stacks * M_PI;
+        float theta2 = static_cast<float>(i + 1) / stacks * M_PI;
 
-        for (int j = 0; j <= slices; ++j) {
-            float phi = static_cast<float>(j) / slices * 2 * M_PI;
-            float sinPhi = sin(phi);
-            float cosPhi = cos(phi);
+        for (int j = 0; j < slices; ++j) {
+            float phi1 = static_cast<float>(j) / slices * 2 * M_PI;
+            float phi2 = static_cast<float>(j + 1) / slices * 2 * M_PI;
 
-            Vertex vertex;
-            vertex.x = radius * cosPhi * sinTheta;
-            vertex.y = radius * cosTheta;
-            vertex.z = radius * sinPhi * sinTheta;
+            // Vertices
+            Vertex v1, v2, v3, v4;
+            v1.x = radius * sin(theta1) * cos(phi1);
+            v1.y = radius * cos(theta1);
+            v1.z = radius * sin(theta1) * sin(phi1);
 
-            // Calculate normal
-            vertex.nx = cosPhi * sinTheta;
-            vertex.ny = cosTheta;
-            vertex.nz = sinPhi * sinTheta;
+            v2.x = radius * sin(theta2) * cos(phi1);
+            v2.y = radius * cos(theta2);
+            v2.z = radius * sin(theta2) * sin(phi1);
 
-            // Calculate texture coordinates
-            vertex.s = static_cast<float>(j) / slices;
-            vertex.t = static_cast<float>(i) / stacks;
+            v3.x = radius * sin(theta1) * cos(phi2);
+            v3.y = radius * cos(theta1);
+            v3.z = radius * sin(theta1) * sin(phi2);
 
-            // Store vertex, normal, and texture coordinate
-            vertices.push_back(vertex);
-            normals.push_back(vertex.nx);
-            normals.push_back(vertex.ny);
-            normals.push_back(vertex.nz);
-            texCoords.push_back(vertex.s);
-            texCoords.push_back(vertex.t);
+            v4.x = radius * sin(theta2) * cos(phi2);
+            v4.y = radius * cos(theta2);
+            v4.z = radius * sin(theta2) * sin(phi2);
+
+            // Normals
+            v1.nx = sin(theta1) * cos(phi1);
+            v1.ny = cos(theta1);
+            v1.nz = sin(theta1) * sin(phi1);
+
+            v2.nx = sin(theta2) * cos(phi1);
+            v2.ny = cos(theta2);
+            v2.nz = sin(theta2) * sin(phi1);
+
+            v3.nx = sin(theta1) * cos(phi2);
+            v3.ny = cos(theta1);
+            v3.nz = sin(theta1) * sin(phi2);
+
+            v4.nx = sin(theta2) * cos(phi2);
+            v4.ny = cos(theta2);
+            v4.nz = sin(theta2) * sin(phi2);
+
+            // Texture coordinates
+            v1.s = static_cast<float>(j) / slices;
+            v1.t = static_cast<float>(i) / stacks;
+
+            v2.s = static_cast<float>(j) / slices;
+            v2.t = static_cast<float>(i + 1) / stacks;
+
+            v3.s = static_cast<float>(j + 1) / slices;
+            v3.t = static_cast<float>(i) / stacks;
+
+            v4.s = static_cast<float>(j + 1) / slices;
+            v4.t = static_cast<float>(i + 1) / stacks;
+
+            // Triangle 1
+            vertices.push_back(v1);
+            vertices.push_back(v2);
+            vertices.push_back(v4);
+
+            normals.push_back(v1.nx);
+            normals.push_back(v1.ny);
+            normals.push_back(v1.nz);
+            normals.push_back(v2.nx);
+            normals.push_back(v2.ny);
+            normals.push_back(v2.nz);
+            normals.push_back(v4.nx);
+            normals.push_back(v4.ny);
+            normals.push_back(v4.nz);
+
+            texCoords.push_back(v1.s);
+            texCoords.push_back(v1.t);
+            texCoords.push_back(v2.s);
+            texCoords.push_back(v2.t);
+            texCoords.push_back(v4.s);
+            texCoords.push_back(v4.t);
+
+            // Triangle 2
+            vertices.push_back(v1);
+            vertices.push_back(v3);
+            vertices.push_back(v4);
+
+            normals.push_back(v1.nx);
+            normals.push_back(v1.ny);
+            normals.push_back(v1.nz);
+            normals.push_back(v3.nx);
+            normals.push_back(v3.ny);
+            normals.push_back(v3.nz);
+            normals.push_back(v4.nx);
+            normals.push_back(v4.ny);
+            normals.push_back(v4.nz);
+
+            texCoords.push_back(v1.s);
+            texCoords.push_back(v1.t);
+            texCoords.push_back(v3.s);
+            texCoords.push_back(v3.t);
+            texCoords.push_back(v4.s);
+            texCoords.push_back(v4.t);
         }
     }
 }

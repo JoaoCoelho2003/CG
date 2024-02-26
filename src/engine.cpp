@@ -57,6 +57,15 @@ void keyboard_movement(unsigned char key, int x, int y) {
         case 'x':
             scaleHeight *= 0.9f;
             break;
+        case '1':
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            break;
+        case '2':
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            break;
+        case '3':
+            glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+            break;
     }
     glutPostRedisplay();
 }
@@ -135,6 +144,8 @@ void display() {
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
+    glTranslatef(translateX, 0.0f, translateZ);
+    glRotatef(rotateAngle, 0.0f, 1.0f, 0.0f);
     gluPerspective(world.camera.fov, (float)world.window.width / world.window.height, world.camera.near, world.camera.far);
     glMatrixMode(GL_MODELVIEW);
 
@@ -167,13 +178,14 @@ void display() {
 int main(int argc, char* argv[]) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(512, 512);
+    glutInitWindowPosition(100, 100);
+    glutInitWindowSize(800, 800);
     glutCreateWindow("Engine");
 
     glEnable(GL_DEPTH_TEST);
 
     world.camera = {0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 60.0f, 1.0f, 1000.0f};
-    world.window = {1920, 1080};
+    world.window = {800, 800};
 
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard_movement);
