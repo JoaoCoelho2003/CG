@@ -6,12 +6,9 @@
 
 int main(int argc, char* argv[]) {
     if (argc != 6) {
-        std::cerr << "Usage: generator sphere <radius> <slices> <stacks> <output_file>" << std::endl;
+        std::cerr << "Usage: generator <figure> <radius> <slices> <stacks> <output_file>" << std::endl;
         return 1;
     }
-
-    // if the figure is a sphere
-    // ./generator sphere 1 10 10 sphere_1_10_10.3d
 
     std::string figure = argv[1];
 

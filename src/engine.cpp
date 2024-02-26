@@ -74,6 +74,38 @@ void parseXML(const char* filename, World& world) {
         return;
     }
 
+    // Parse camera
+    tinyxml2::XMLElement* cameraElement = root->FirstChildElement("camera");
+    if (cameraElement) {
+        world.camera = {
+            cameraElement->FirstChildElement("position")->FloatAttribute("x"),
+            cameraElement->FirstChildElement("position")->FloatAttribute("y"),
+            cameraElement->FirstChildElement("position")->FloatAttribute("z"),
+            cameraElement->FirstChildElement("lookAt")->FloatAttribute("x"),
+            cameraElement->FirstChildElement("lookAt")->FloatAttribute("y"),
+            cameraElement->FirstChildElement("lookAt")->FloatAttribute("z"),
+            cameraElement->FirstChildElement("up")->FloatAttribute("x"),
+            cameraElement->FirstChildElement("up")->FloatAttribute("y"),
+            cameraElement->FirstChildElement("up")->FloatAttribute("z"),
+            cameraElement->FirstChildElement("projection")->FloatAttribute("fov"),
+            cameraElement->FirstChildElement("projection")->FloatAttribute("near"),
+            cameraElement->FirstChildElement("projection")->FloatAttribute("far")
+        };
+    } else {
+        std::cerr << "Error: Missing <camera> element in XML file." << std::endl;
+    }
+
+    // Parse window
+    tinyxml2::XMLElement* windowElement = root->FirstChildElement("window");
+    if (windowElement) {
+        world.window = {
+            windowElement->IntAttribute("width"),
+            windowElement->IntAttribute("height")
+        };
+    } else {
+        std::cerr << "Error: Missing <window> element in XML file." << std::endl;
+    }
+
     // Parse model files
     tinyxml2::XMLElement* groupElement = root->FirstChildElement("group");
     if (groupElement) {
@@ -98,12 +130,12 @@ void display() {
     glLoadIdentity();
 
     gluLookAt(world.camera.posX, world.camera.posY, world.camera.posZ,
-              0.0f, 0.0f, 0.0f,
-              0.0f, 1.0f, 0.0f);
+              world.camera.lookAtX, world.camera.lookAtY, world.camera.lookAtZ,
+              world.camera.upX, world.camera.upY, world.camera.upZ);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(45.0f, (float)world.window.width / world.window.height, 1.0f, 1000.0f);
+    gluPerspective(world.camera.fov, (float)world.window.width / world.window.height, world.camera.near, world.camera.far);
     glMatrixMode(GL_MODELVIEW);
 
     referencial();
@@ -116,10 +148,12 @@ void display() {
             continue;
         }
 
-        // Assuming each line in the model file represents a vertex
+        // Assuming each line in the model file represents a vertex with position, normal, and texture coordinate
         glBegin(GL_TRIANGLES);
-        float x, y, z;
-        while (inputFile >> x >> y >> z) {
+        float x, y, z, nx, ny, nz, s, t;
+        while (inputFile >> x >> y >> z >> nx >> ny >> nz >> s >> t) {
+            glNormal3f(nx, ny, nz);
+            glTexCoord2f(s, t);
             glVertex3f(x, y, z);
         }
         glEnd();
@@ -138,7 +172,7 @@ int main(int argc, char* argv[]) {
 
     glEnable(GL_DEPTH_TEST);
 
-    world.camera = {0.0f, 0.0f, 5.0f};
+    world.camera = {0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 60.0f, 1.0f, 1000.0f};
     world.window = {1920, 1080};
 
     glutDisplayFunc(display);
