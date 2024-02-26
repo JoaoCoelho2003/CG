@@ -1,12 +1,13 @@
-#ifndef SPHERE_H
-#define SPHERE_H
+#ifndef CONE_H
+#define CONE_H
 
 #include <vector>
 #include <string>
 #include "Vertex.h"
 
-class Sphere {
+class Cone {
 private:
+    float height;
     float radius;
     int slices;
     int stacks;
@@ -16,7 +17,7 @@ private:
     std::vector<float> texCoords;
 
 public:
-    Sphere(float r, int sl, int st);
+    Cone(float h, float r, int sl, int st);
 
     void generateVertices();
 

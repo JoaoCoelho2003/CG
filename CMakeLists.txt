@@ -7,7 +7,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Add engine.cpp and generator.cpp as separate executables
 add_executable(engine src/engine.cpp)
-add_executable(generator src/generator.cpp src/Figures/Sphere.cpp)
+add_executable(generator src/generator.cpp src/Figures/Sphere.cpp src/Figures/Cone.cpp)
 
 find_package(OpenGL REQUIRED)
 include_directories(${OpenGL_INCLUDE_DIRS})
