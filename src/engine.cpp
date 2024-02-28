@@ -2,8 +2,9 @@
 #include "tinyxml2.h"
 #include <vector>
 #include <fstream>
-#include <cmath>
-#include <GL/freeglut.h>
+#define _USE_MATH_DEFINES
+#include <math.h>
+#include <GL/glut.h>
 #include "../include/World.h"
 
 World world;
@@ -28,7 +29,6 @@ void referencial() {
 		glVertex3f(0.0f, 0.0f, -100.0f);
 		glVertex3f(0.0f, 0.0f, 100.0f);
     glEnd();
-
 }
 
 void keyboard_movement(unsigned char key, int x, int y) {
@@ -133,23 +133,23 @@ void parseXML(const char* filename, World& world) {
 }
 
 void display() {
+    gluPerspective(world.camera.fov, (float)world.window.width / world.window.height, world.camera.near, world.camera.far);
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f(1.0f, 1.0f, 1.0f);
-
     glLoadIdentity();
+
 
     gluLookAt(world.camera.posX, world.camera.posY, world.camera.posZ,
               world.camera.lookAtX, world.camera.lookAtY, world.camera.lookAtZ,
               world.camera.upX, world.camera.upY, world.camera.upZ);
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glTranslatef(translateX, 0.0f, translateZ);
+
     glRotatef(rotateAngle, 0.0f, 1.0f, 0.0f);
-    gluPerspective(world.camera.fov, (float)world.window.width / world.window.height, world.camera.near, world.camera.far);
-    glMatrixMode(GL_MODELVIEW);
+    glTranslatef(translateX, 0.0f, translateZ);
 
     referencial();
+    glMatrixMode(GL_MODELVIEW);
 
     // Render models
     for (const auto& model : world.models) {
@@ -175,6 +175,23 @@ void display() {
     glutSwapBuffers();
 }
 
+void resize(int w, int h) {
+
+	if(h == 0)
+		h = 1;
+
+	float ratio = w * 1.0 / h;
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	
+    glViewport(0, 0, w, h);
+
+	gluPerspective(45.0f ,ratio, 1.0f ,1000.0f);
+
+	glMatrixMode(GL_MODELVIEW);
+}
+
 int main(int argc, char* argv[]) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -189,6 +206,7 @@ int main(int argc, char* argv[]) {
 
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard_movement);
+    glutReshapeFunc(resize);
 
     if (argc != 2) {
         std::cerr << "Usage: engine <config_file.xml>" << std::endl;

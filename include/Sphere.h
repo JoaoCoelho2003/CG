@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <string>
-#include "Vertex.h"
+#include <glm/glm.hpp>
 
 class Sphere {
 private:
@@ -11,9 +11,10 @@ private:
     int slices;
     int stacks;
 
-    std::vector<Vertex> vertices;
+    std::vector<glm::vec3> vertices;
     std::vector<float> normals;
     std::vector<float> texCoords;
+    std::vector<unsigned int> indices;
 
 public:
     Sphere(float r, int sl, int st);

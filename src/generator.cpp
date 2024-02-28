@@ -2,7 +2,8 @@
 #include "../include/Cone.h"
 #include <iostream>
 #include <fstream>
-#include <cmath>
+#define _USE_MATH_DEFINES
+#include <math.h>
 #include <vector>
 
 int main(int argc, char* argv[]) {
