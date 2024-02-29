@@ -3,7 +3,9 @@
 *.o
 *.out
 *.exe
-
+*.3d
+engine
+generator
 # Ignore IDE and editor specific files
 /CG/.vscode/
 /CG/.idea/

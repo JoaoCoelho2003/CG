@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/asus/projects/CG/CG/include/World.h
+vector
+-
+string
+-
+
+/home/asus/projects/CG/CG/src/engine.cpp
+iostream
+-
+tinyxml2.h
+/home/asus/projects/CG/CG/src/tinyxml2.h
+vector
+-
+fstream
+-
+math.h
+-
+GL/glut.h
+-
+../include/World.h
+/home/asus/projects/CG/CG/include/World.h
+

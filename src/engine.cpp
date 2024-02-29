@@ -162,9 +162,7 @@ void display() {
         // Assuming each line in the model file represents a vertex with position, normal, and texture coordinate
         glBegin(GL_TRIANGLES);
         float x, y, z, nx, ny, nz, s, t;
-        while (inputFile >> x >> y >> z >> nx >> ny >> nz >> s >> t) {
-            glNormal3f(nx, ny, nz);
-            glTexCoord2f(s, t);
+        while (inputFile >> x >> y >> z) {
             glVertex3f(x, y, z);
         }
         glEnd();

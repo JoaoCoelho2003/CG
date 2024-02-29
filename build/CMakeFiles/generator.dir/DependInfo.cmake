@@ -1,15 +1,18 @@
-
-# Consider dependencies only in project.
-set(CMAKE_DEPENDS_IN_PROJECT_ONLY OFF)
-
 # The set of languages for which implicit dependencies are needed:
 set(CMAKE_DEPENDS_LANGUAGES
+  "CXX"
   )
+# The set of files for implicit dependencies of each language:
+set(CMAKE_DEPENDS_CHECK_CXX
+  "/home/asus/projects/CG/CG/src/Figures/Cone.cpp" "/home/asus/projects/CG/CG/build/CMakeFiles/generator.dir/src/Figures/Cone.cpp.o"
+  "/home/asus/projects/CG/CG/src/Figures/Plane.cpp" "/home/asus/projects/CG/CG/build/CMakeFiles/generator.dir/src/Figures/Plane.cpp.o"
+  "/home/asus/projects/CG/CG/src/Figures/Sphere.cpp" "/home/asus/projects/CG/CG/build/CMakeFiles/generator.dir/src/Figures/Sphere.cpp.o"
+  "/home/asus/projects/CG/CG/src/generator.cpp" "/home/asus/projects/CG/CG/build/CMakeFiles/generator.dir/src/generator.cpp.o"
+  )
+set(CMAKE_CXX_COMPILER_ID "GNU")
 
-# The set of dependency files which are needed:
-set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/jojocoelho/Desktop/3Ano2Semestre/CG/src/Figures/Sphere.cpp" "CMakeFiles/generator.dir/src/Figures/Sphere.cpp.o" "gcc" "CMakeFiles/generator.dir/src/Figures/Sphere.cpp.o.d"
-  "/home/jojocoelho/Desktop/3Ano2Semestre/CG/src/generator.cpp" "CMakeFiles/generator.dir/src/generator.cpp.o" "gcc" "CMakeFiles/generator.dir/src/generator.cpp.o.d"
+# The include file search paths:
+set(CMAKE_CXX_TARGET_INCLUDE_PATH
   )
 
 # Targets to which this target links.

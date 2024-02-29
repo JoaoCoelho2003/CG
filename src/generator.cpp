@@ -1,5 +1,4 @@
-#include "../include/Sphere.h"
-#include "../include/Cone.h"
+#include "../include/all_headers.h"
 #include <iostream>
 #include <fstream>
 #define _USE_MATH_DEFINES
@@ -27,6 +26,14 @@ int main(int argc, char* argv[]) {
         Cone cone(height, radius, slices, stacks);
         cone.generateVertices();
         cone.writeToFile(outputFilename);
+    }    
+    else if (figure == "plane") {
+        float length = std::stof(argv[2]);
+        float divisions = std::stof(argv[3]);
+        std::string outputFilename = argv[4];
+        Plane plane(length, divisions);
+        plane.generateVertices();
+        plane.writeToFile(outputFilename);
     }
     else {
         std::cerr << "Invalid figure: " << figure << std::endl;

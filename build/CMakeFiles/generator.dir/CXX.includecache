@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/asus/projects/CG/CG/include/Plane.h
+vector
+-
+string
+-
+glm/glm.hpp
+-
+
+/home/asus/projects/CG/CG/src/Figures/Plane.cpp
+../../include/Plane.h
+/home/asus/projects/CG/CG/include/Plane.h
+math.h
+-
+fstream
+-
+iostream
+-
+glm/glm.hpp
+-
+
