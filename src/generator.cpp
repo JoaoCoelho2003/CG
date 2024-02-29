@@ -35,6 +35,14 @@ int main(int argc, char* argv[]) {
         plane.generateVertices();
         plane.writeToFile(outputFilename);
     }
+    else if (figure == "box") {
+        float dimension = std::stof(argv[2]);
+        float divisions = std::stof(argv[3]);
+        std::string outputFilename = argv[4];
+        Box box(dimension, divisions);
+        box.generateVertices();
+        box.writeToFile(outputFilename);
+    }
     else {
         std::cerr << "Invalid figure: " << figure << std::endl;
         return 1;

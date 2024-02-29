@@ -5,5 +5,6 @@
 #include "Plane.h"
 #include "Sphere.h"
 #include "World.h"
+#include "Box.h"
 
 #endif /* ALL_HEADERS_H */
