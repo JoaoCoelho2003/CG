@@ -9,42 +9,47 @@ Cone::Cone(float h, float r, int sl, int st) : height(h), radius(r), slices(sl),
 
 void Cone::generateVertices() {
     vertices.clear();
-    normals.clear();
-    texCoords.clear();
 
-    // Add the apex of the cone
-    vertices.push_back(glm::vec3(0.0f, 0.0f, height));
-    normals.push_back(0.0f);
-    normals.push_back(0.0f);
-    normals.push_back(1.0f);
-    texCoords.push_back(0.5f);
-    texCoords.push_back(0.5f);
+    float height_stack = height / stacks;
 
     // Generate vertices for each stack and slice
-    for (int i = 0; i <= stacks; ++i) {
-        float stack_height = static_cast<float>(i) / stacks * height;
-        float radius_at_stack = (1.0f - stack_height / height) * radius;
+    for (int i = 0; i < stacks; ++i) {
+        float stack_height = i * height_stack;
+        float radius_at_stack = radius * (1 - stack_height / height);
+        float stack_height_next = (i + 1) * height_stack;
+        float radius_at_stack_next = radius * (1 - stack_height_next / height);
+
 
         for (int j = 0; j < slices; ++j) {
-            float theta = static_cast<float>(j) / slices * 2 * M_PI;
+            float theta = j * 2 * M_PI / slices;
+            float theta_next = (j + 1) * 2 * M_PI / slices;
 
-            float x = radius_at_stack * cos(theta);
-            float y = radius_at_stack * sin(theta);
+            glm::vec3 v1, v2, v3, v4;
+            v1.x = radius_at_stack * sin(theta);
+            v1.y = stack_height;
+            v1.z = radius_at_stack * cos(theta);
 
-            glm::vec3 vertex(x, y, stack_height);
-            vertices.push_back(vertex);
+            v2.x = radius_at_stack * sin(theta_next);
+            v2.y = stack_height;
+            v2.z = radius_at_stack * cos(theta_next);
 
-            // Normals for each vertex
-            glm::vec3 normal = glm::normalize(glm::vec3(x, y, radius) - glm::vec3(0.0f, 0.0f, height));
-            normals.push_back(normal.x);
-            normals.push_back(normal.y);
-            normals.push_back(normal.z);
+            v3.x = radius_at_stack_next * sin(theta_next);
+            v3.y = stack_height_next;
+            v3.z = radius_at_stack_next * cos(theta_next);
 
-            // Texture coordinates
-            float s = static_cast<float>(j) / slices;
-            float t = static_cast<float>(i) / stacks;
-            texCoords.push_back(s);
-            texCoords.push_back(t);
+            v4.x = radius_at_stack_next * sin(theta);
+            v4.y = stack_height_next;
+            v4.z = radius_at_stack_next * cos(theta);
+
+            // Triangle 1
+            vertices.push_back(v1);
+            vertices.push_back(v2);
+            vertices.push_back(v3);
+
+            // Triangle 2
+            vertices.push_back(v1);
+            vertices.push_back(v3);
+            vertices.push_back(v4);
         }
     }
 }
@@ -56,9 +61,7 @@ void Cone::writeToFile(const std::string& filename) {
         return;
     }
     for (size_t i = 0; i < vertices.size(); ++i) {
-        outputFile << vertices[i].x << " " << vertices[i].y << " " << vertices[i].z << " "
-                   << normals[i * 3] << " " << normals[i * 3 + 1] << " " << normals[i * 3 + 2] << " "
-                   << texCoords[i * 2] << " " << texCoords[i * 2 + 1] << std::endl;
+        outputFile << vertices[i].x << " " << vertices[i].y << " " << vertices[i].z << std::endl;
     }
 
     outputFile.close();

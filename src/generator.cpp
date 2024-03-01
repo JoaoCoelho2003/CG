@@ -18,8 +18,8 @@ int main(int argc, char* argv[]) {
         sphere.writeToFile(outputFilename);
     }
     else if (figure == "cone") {
-        float height = std::stof(argv[2]);
-        float radius = std::stof(argv[3]);
+        float radius = std::stof(argv[2]);
+        float height = std::stof(argv[3]);
         int slices = std::stoi(argv[4]);
         int stacks = std::stoi(argv[5]);
         std::string outputFilename = argv[6];
