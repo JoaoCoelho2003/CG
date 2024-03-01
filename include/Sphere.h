@@ -12,9 +12,6 @@ private:
     int stacks;
 
     std::vector<glm::vec3> vertices;
-    std::vector<float> normals;
-    std::vector<float> texCoords;
-    std::vector<unsigned int> indices;
 
 public:
     Sphere(float r, int sl, int st);
