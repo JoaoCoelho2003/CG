@@ -41,6 +41,13 @@ void Cone::generateVertices() {
             v4.y = stack_height_next;
             v4.z = radius_at_stack_next * cos(theta);
 
+            // Bottom 
+            if (i == 0) {
+                vertices.push_back(v1);
+                vertices.push_back(v2);
+                vertices.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+            }
+
             // Triangle 1
             vertices.push_back(v1);
             vertices.push_back(v2);
