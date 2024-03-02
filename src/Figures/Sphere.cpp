@@ -20,23 +20,23 @@ void Sphere::generateVertices() {
             // Vertices of the current quad
             glm::vec3 v1 = glm::vec3(
                 radius * std::sin(phi1) * std::cos(theta1),
-                radius * std::sin(phi1) * std::sin(theta1),
-                radius * std::cos(phi1)
+                radius * std::cos(phi1),
+                radius * std::sin(phi1) * std::sin(theta1)
             );
             glm::vec3 v2 = glm::vec3(
                 radius * std::sin(phi1) * std::cos(theta2),
-                radius * std::sin(phi1) * std::sin(theta2),
-                radius * std::cos(phi1)
+                radius * std::cos(phi1),
+                radius * std::sin(phi1) * std::sin(theta2)
             );
             glm::vec3 v3 = glm::vec3(
                 radius * std::sin(phi2) * std::cos(theta1),
-                radius * std::sin(phi2) * std::sin(theta1),
-                radius * std::cos(phi2)
+                radius * std::cos(phi2),
+                radius * std::sin(phi2) * std::sin(theta1)
             );
             glm::vec3 v4 = glm::vec3(
                 radius * std::sin(phi2) * std::cos(theta2),
-                radius * std::sin(phi2) * std::sin(theta2),
-                radius * std::cos(phi2)
+                radius * std::cos(phi2),
+                radius * std::sin(phi2) * std::sin(theta2)
             );
 
             // Add triangles formed by the quad
