@@ -1,6 +1,7 @@
 file(REMOVE_RECURSE
   "../generator"
   "../generator.pdb"
+  "CMakeFiles/generator.dir/src/Figures/Box.cpp.o"
   "CMakeFiles/generator.dir/src/Figures/Cone.cpp.o"
   "CMakeFiles/generator.dir/src/Figures/Plane.cpp.o"
   "CMakeFiles/generator.dir/src/Figures/Sphere.cpp.o"

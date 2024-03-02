@@ -11,7 +11,9 @@ World world;
 
 float translateX = 0.0f;
 float translateZ = 0.0f;
-float rotateAngle = 0.0f;
+float translateY = 0.0f;
+float rotateAngle_lr = 0.0f;
+float rotateAngle_ud = 0.0f;
 float scaleHeight = 1.0f;
 
 void referencial() {
@@ -45,12 +47,6 @@ void keyboard_movement(unsigned char key, int x, int y) {
         case 'd':
             translateX -= 0.2f;
             break;
-        case 'q':
-            rotateAngle += 1.0f;
-            break;
-        case 'e':
-            rotateAngle -= 1.0f;
-            break;
         case 'z':
             scaleHeight *= 1.1f;
             break;
@@ -65,6 +61,30 @@ void keyboard_movement(unsigned char key, int x, int y) {
             break;
         case '3':
             glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+            break;
+    }
+    glutPostRedisplay();
+}
+
+void keyboard_special(int key, int x, int y) {
+    switch (key) {
+        case GLUT_KEY_PAGE_UP:
+            translateY -= 0.2f;
+            break;
+        case GLUT_KEY_PAGE_DOWN:
+            translateY += 0.2f;
+            break;
+        case GLUT_KEY_LEFT:
+            rotateAngle_lr -= 1.0f;
+            break;
+        case GLUT_KEY_RIGHT:
+            rotateAngle_lr += 1.0f;
+            break;
+        case GLUT_KEY_UP:
+            rotateAngle_ud += 1.0f;
+            break;
+        case GLUT_KEY_DOWN:
+            rotateAngle_ud -= 1.0f;
             break;
     }
     glutPostRedisplay();
@@ -145,8 +165,9 @@ void display() {
               world.camera.upX, world.camera.upY, world.camera.upZ);
 
 
-    glRotatef(rotateAngle, 0.0f, 1.0f, 0.0f);
-    glTranslatef(translateX, 0.0f, translateZ);
+    glRotatef(rotateAngle_lr, 0.0f, 1.0f, 0.0f);
+    glRotatef(rotateAngle_ud, 0.0f, 0.0f, 1.0f);
+    glTranslatef(translateX, translateY, translateZ);
 
     referencial();
     glMatrixMode(GL_MODELVIEW);
@@ -204,6 +225,7 @@ int main(int argc, char* argv[]) {
 
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard_movement);
+    glutSpecialFunc(keyboard_special);
     glutReshapeFunc(resize);
 
     if (argc != 2) {

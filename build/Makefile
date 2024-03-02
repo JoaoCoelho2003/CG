@@ -128,7 +128,7 @@ clean-all/fast:
 
 # Build rule for target.
 generator: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 generator CFlags=-g
+	$(MAKE) -f CMakeFiles/Makefile2 generator
 .PHONY : generator
 
 # fast build rule for target.
@@ -148,6 +148,33 @@ engine: cmake_check_build_system
 engine/fast:
 	$(MAKE) -f CMakeFiles/engine.dir/build.make CMakeFiles/engine.dir/build
 .PHONY : engine/fast
+
+src/Figures/Box.o: src/Figures/Box.cpp.o
+
+.PHONY : src/Figures/Box.o
+
+# target to build an object file
+src/Figures/Box.cpp.o:
+	$(MAKE) -f CMakeFiles/generator.dir/build.make CMakeFiles/generator.dir/src/Figures/Box.cpp.o
+.PHONY : src/Figures/Box.cpp.o
+
+src/Figures/Box.i: src/Figures/Box.cpp.i
+
+.PHONY : src/Figures/Box.i
+
+# target to preprocess a source file
+src/Figures/Box.cpp.i:
+	$(MAKE) -f CMakeFiles/generator.dir/build.make CMakeFiles/generator.dir/src/Figures/Box.cpp.i
+.PHONY : src/Figures/Box.cpp.i
+
+src/Figures/Box.s: src/Figures/Box.cpp.s
+
+.PHONY : src/Figures/Box.s
+
+# target to generate assembly for a file
+src/Figures/Box.cpp.s:
+	$(MAKE) -f CMakeFiles/generator.dir/build.make CMakeFiles/generator.dir/src/Figures/Box.cpp.s
+.PHONY : src/Figures/Box.cpp.s
 
 src/Figures/Cone.o: src/Figures/Cone.cpp.o
 
@@ -295,6 +322,9 @@ help:
 	@echo "... clean-all"
 	@echo "... generator"
 	@echo "... engine"
+	@echo "... src/Figures/Box.o"
+	@echo "... src/Figures/Box.i"
+	@echo "... src/Figures/Box.s"
 	@echo "... src/Figures/Cone.o"
 	@echo "... src/Figures/Cone.i"
 	@echo "... src/Figures/Cone.s"

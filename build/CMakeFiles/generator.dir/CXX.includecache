@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/asus/projects/CG/CG/include/Plane.h
+/home/asus/projects/CG/CG/include/Sphere.h
 vector
 -
 string
@@ -14,15 +14,15 @@ string
 glm/glm.hpp
 -
 
-/home/asus/projects/CG/CG/src/Figures/Plane.cpp
-../../include/Plane.h
-/home/asus/projects/CG/CG/include/Plane.h
-math.h
--
+/home/asus/projects/CG/CG/src/Figures/Sphere.cpp
+../../include/Sphere.h
+/home/asus/projects/CG/CG/include/Sphere.h
 fstream
 -
 iostream
 -
 glm/glm.hpp
+-
+cmath
 -
 

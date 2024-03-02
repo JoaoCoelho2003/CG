@@ -4,6 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
+  "/home/asus/projects/CG/CG/src/Figures/Box.cpp" "/home/asus/projects/CG/CG/build/CMakeFiles/generator.dir/src/Figures/Box.cpp.o"
   "/home/asus/projects/CG/CG/src/Figures/Cone.cpp" "/home/asus/projects/CG/CG/build/CMakeFiles/generator.dir/src/Figures/Cone.cpp.o"
   "/home/asus/projects/CG/CG/src/Figures/Plane.cpp" "/home/asus/projects/CG/CG/build/CMakeFiles/generator.dir/src/Figures/Plane.cpp.o"
   "/home/asus/projects/CG/CG/src/Figures/Sphere.cpp" "/home/asus/projects/CG/CG/build/CMakeFiles/generator.dir/src/Figures/Sphere.cpp.o"
