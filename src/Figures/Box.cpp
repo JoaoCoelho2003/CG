@@ -15,81 +15,116 @@ void Box::generateVertices() {
 
     // Generate vertices for each face
 
+    float half_dim = dimension / 2.0f;
     // Front face
     for (int i = 0; i < divisions; ++i) {
-        for (int j = 0; j < divisions; ++j) {
-            vertices.push_back(glm::vec3(-dimension / 2 + i * step, -dimension / 2 + j * step, dimension / 2));
-            vertices.push_back(glm::vec3(-dimension / 2 + (i + 1) * step, -dimension / 2 + j * step, dimension / 2));
-            vertices.push_back(glm::vec3(-dimension / 2 + i * step, -dimension / 2 + (j + 1) * step, dimension / 2));
+        float x = -half_dim + i * step;
+        float x_next = -half_dim + (i + 1) * step;
 
-            vertices.push_back(glm::vec3(-dimension / 2 + (i + 1) * step, -dimension / 2 + j * step, dimension / 2));
-            vertices.push_back(glm::vec3(-dimension / 2 + (i + 1) * step, -dimension / 2 + (j + 1) * step, dimension / 2));
-            vertices.push_back(glm::vec3(-dimension / 2 + i * step, -dimension / 2 + (j + 1) * step, dimension / 2));
+        for (int j = 0; j < divisions; ++j) {
+            float y = -half_dim + j * step;
+            float y_next = -half_dim + (j + 1) * step;
+
+            vertices.push_back(glm::vec3(x, y, half_dim));
+            vertices.push_back(glm::vec3(x_next, y, half_dim));
+            vertices.push_back(glm::vec3(x,y_next, half_dim));
+
+            vertices.push_back(glm::vec3(x_next, y, half_dim));
+            vertices.push_back(glm::vec3(x_next,y_next, half_dim));
+            vertices.push_back(glm::vec3(x,y_next, half_dim));
         }
     }
 
     // Back face
     for (int i = 0; i < divisions; ++i) {
+        float x = -half_dim + i * step;
+        float x_next = -half_dim + (i + 1) * step;
         for (int j = 0; j < divisions; ++j) {
-            vertices.push_back(glm::vec3(-dimension / 2 + i * step, -dimension / 2 + j * step, -dimension / 2));
-            vertices.push_back(glm::vec3(-dimension / 2 + i * step, -dimension / 2 + (j + 1) * step, -dimension / 2));
-            vertices.push_back(glm::vec3(-dimension / 2 + (i + 1) * step, -dimension / 2 + j * step, -dimension / 2));
+            float y = -half_dim + j * step;
+            float y_next = -half_dim + (j + 1) * step;
 
-            vertices.push_back(glm::vec3(-dimension / 2 + (i + 1) * step, -dimension / 2 + j * step, -dimension / 2));
-            vertices.push_back(glm::vec3(-dimension / 2 + i * step, -dimension / 2 + (j + 1) * step, -dimension / 2));
-            vertices.push_back(glm::vec3(-dimension / 2 + (i + 1) * step, -dimension / 2 + (j + 1) * step, -dimension / 2));
+            vertices.push_back(glm::vec3(x, y, -half_dim));
+            vertices.push_back(glm::vec3(x, y_next, -half_dim));
+            vertices.push_back(glm::vec3(x_next, y, -half_dim));
+
+            vertices.push_back(glm::vec3(x_next, y, -half_dim));
+            vertices.push_back(glm::vec3(x, y_next, -half_dim));
+            vertices.push_back(glm::vec3(x_next, y_next, -half_dim));
         }
     }
 
     // Top face
     for (int i = 0; i < divisions; ++i) {
+        float x = -half_dim + i * step;
+        float x_next = -half_dim + (i + 1) * step;
         for (int j = 0; j < divisions; ++j) {
-            vertices.push_back(glm::vec3(-dimension / 2 + i * step, dimension / 2, -dimension / 2 + j * step));
-            vertices.push_back(glm::vec3(-dimension / 2 + (i + 1) * step, dimension / 2, -dimension / 2 + j * step));
-            vertices.push_back(glm::vec3(-dimension / 2 + i * step, dimension / 2, -dimension / 2 + (j + 1) * step));
+            float z = -half_dim + j * step;
+            float z_next = -half_dim + (j + 1) * step;
 
-            vertices.push_back(glm::vec3(-dimension / 2 + (i + 1) * step, dimension / 2, -dimension / 2 + j * step));
-            vertices.push_back(glm::vec3(-dimension / 2 + (i + 1) * step, dimension / 2, -dimension / 2 + (j + 1) * step));
-            vertices.push_back(glm::vec3(-dimension / 2 + i * step, dimension / 2, -dimension / 2 + (j + 1) * step));
+            vertices.push_back(glm::vec3(x, half_dim, z));
+            vertices.push_back(glm::vec3(x, half_dim, z_next));
+            vertices.push_back(glm::vec3(x_next, half_dim, z));
+
+            vertices.push_back(glm::vec3(x_next, half_dim, z));
+            vertices.push_back(glm::vec3(x, half_dim, z_next));
+            vertices.push_back(glm::vec3(x_next, half_dim, z_next));
         }
     }
 
     // Bottom face
     for (int i = 0; i < divisions; ++i) {
-        for (int j = 0; j < divisions; ++j) {
-            vertices.push_back(glm::vec3(-dimension / 2 + i * step, -dimension / 2, -dimension / 2 + j * step));
-            vertices.push_back(glm::vec3(-dimension / 2 + i * step, -dimension / 2, -dimension / 2 + (j + 1) * step));
-            vertices.push_back(glm::vec3(-dimension / 2 + (i + 1) * step, -dimension / 2, -dimension / 2 + j * step));
+        float x = -half_dim + i * step;
+        float x_next = -half_dim + (i + 1) * step;
 
-            vertices.push_back(glm::vec3(-dimension / 2 + (i + 1) * step, -dimension / 2, -dimension / 2 + j * step));
-            vertices.push_back(glm::vec3(-dimension / 2 + i * step, -dimension / 2, -dimension / 2 + (j + 1) * step));
-            vertices.push_back(glm::vec3(-dimension / 2 + (i + 1) * step, -dimension / 2, -dimension / 2 + (j + 1) * step));
+        for (int j = 0; j < divisions; ++j) {
+            float z = -half_dim + j * step;
+            float z_next = -half_dim + (j + 1) * step;
+
+            vertices.push_back(glm::vec3(x, -half_dim, z_next));
+            vertices.push_back(glm::vec3(x, -half_dim, z));
+            vertices.push_back(glm::vec3(x_next, -half_dim, z));
+
+            vertices.push_back(glm::vec3(x_next, -half_dim, z_next));
+            vertices.push_back(glm::vec3(x, -half_dim, z_next));
+            vertices.push_back(glm::vec3(x_next, -half_dim, z));
         }
     }
 
     // Left face
     for (int i = 0; i < divisions; ++i) {
+        float y = -half_dim + i * step;
+        float y_next = -half_dim + (i + 1) * step;
         for (int j = 0; j < divisions; ++j) {
-            vertices.push_back(glm::vec3(-dimension / 2, -dimension / 2 + i * step, -dimension / 2 + j * step));
-            vertices.push_back(glm::vec3(-dimension / 2, -dimension / 2 + i * step, -dimension / 2 + (j + 1) * step));
-            vertices.push_back(glm::vec3(-dimension / 2, -dimension / 2 + (i + 1) * step, -dimension / 2 + j * step));
+            float z = -half_dim + j * step;
+            float z_next = -half_dim + (j + 1) * step;
 
-            vertices.push_back(glm::vec3(-dimension / 2, -dimension / 2 + (i + 1) * step, -dimension / 2 + j * step));
-            vertices.push_back(glm::vec3(-dimension / 2, -dimension / 2 + i * step, -dimension / 2 + (j + 1) * step));
-            vertices.push_back(glm::vec3(-dimension / 2, -dimension / 2 + (i + 1) * step, -dimension / 2 + (j + 1) * step));
+            vertices.push_back(glm::vec3(-half_dim, y, z));
+            vertices.push_back(glm::vec3(-half_dim, y, z_next));
+            vertices.push_back(glm::vec3(-half_dim, y_next, z));
+
+            vertices.push_back(glm::vec3(-half_dim, y_next, z));
+            vertices.push_back(glm::vec3(-half_dim, y, z_next));
+            vertices.push_back(glm::vec3(-half_dim, y_next, z_next));
         }
     }
 
     // Right face
     for (int i = 0; i < divisions; ++i) {
-        for (int j = 0; j < divisions; ++j) {
-            vertices.push_back(glm::vec3(dimension / 2, -dimension / 2 + i * step, -dimension / 2 + j * step));
-            vertices.push_back(glm::vec3(dimension / 2, -dimension / 2 + (i + 1) * step, -dimension / 2 + j * step));
-            vertices.push_back(glm::vec3(dimension / 2, -dimension / 2 + i * step, -dimension / 2 + (j + 1) * step));
+        float y = -half_dim + i * step;
+        float y_next = -half_dim + (i + 1) * step;
 
-            vertices.push_back(glm::vec3(dimension / 2, -dimension / 2 + (i + 1) * step, -dimension / 2 + j * step));
-            vertices.push_back(glm::vec3(dimension / 2, -dimension / 2 + (i + 1) * step, -dimension / 2 + (j + 1) * step));
-            vertices.push_back(glm::vec3(dimension / 2, -dimension / 2 + i * step, -dimension / 2 + (j + 1) * step));
+        for (int j = 0; j < divisions; ++j) {
+            float z = -half_dim + j * step;
+            float z_next = -half_dim + (j + 1) * step;
+
+
+            vertices.push_back(glm::vec3(half_dim, y, z));
+            vertices.push_back(glm::vec3(half_dim, y_next, z));
+            vertices.push_back(glm::vec3(half_dim, y, z_next));
+
+            vertices.push_back(glm::vec3(half_dim, y_next, z));
+            vertices.push_back(glm::vec3(half_dim, y_next, z_next));
+            vertices.push_back(glm::vec3(half_dim, y, z_next));
         }
     }
 }
