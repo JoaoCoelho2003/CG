@@ -1,5 +1,0 @@
-/home/asus/projects/CG/CG/build/CMakeFiles/rebuild_cache.dir
-/home/asus/projects/CG/CG/build/CMakeFiles/edit_cache.dir
-/home/asus/projects/CG/CG/build/CMakeFiles/clean-all.dir
-/home/asus/projects/CG/CG/build/CMakeFiles/generator.dir
-/home/asus/projects/CG/CG/build/CMakeFiles/engine.dir
