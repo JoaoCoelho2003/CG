@@ -44,8 +44,8 @@ void Plane::generateVertices() {
 
             // Triangle 2
             vertices.push_back(v2);
-            vertices.push_back(v3);
-            vertices.push_back(v4);        
+            vertices.push_back(v4);
+            vertices.push_back(v3);      
         }
     }
 }

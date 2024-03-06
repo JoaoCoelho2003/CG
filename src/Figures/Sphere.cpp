@@ -13,7 +13,7 @@ void Sphere::generateVertices() {
     for (int i = 0; i <= slices; ++i) {
         float theta1 = i * 2 * M_PI / slices;
         float theta2 = (i + 1) * 2 * M_PI / slices;
-        for (int j = 0; j <= stacks; ++j) {
+        for (int j = 0; j < stacks; ++j) {
             float phi1 = j * M_PI / stacks;
             float phi2 = (j + 1) * M_PI / stacks;
 
@@ -41,12 +41,12 @@ void Sphere::generateVertices() {
 
             // Add triangles formed by the quad
             vertices.push_back(v1);
-            vertices.push_back(v3);
             vertices.push_back(v2);
+            vertices.push_back(v3);
 
             vertices.push_back(v2);
-            vertices.push_back(v3);
             vertices.push_back(v4);
+            vertices.push_back(v3);
         }
     }
 }

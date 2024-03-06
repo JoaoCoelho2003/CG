@@ -50,13 +50,13 @@ void Cone::generateVertices() {
 
             // Triangle 1
             vertices.push_back(v1);
-            vertices.push_back(v2);
             vertices.push_back(v3);
+            vertices.push_back(v2);
 
             // Triangle 2
             vertices.push_back(v1);
-            vertices.push_back(v3);
             vertices.push_back(v4);
+            vertices.push_back(v3);
         }
     }
 }
