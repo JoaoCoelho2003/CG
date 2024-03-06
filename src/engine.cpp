@@ -153,7 +153,6 @@ void parseXML(const char* filename, World& world) {
 }
 
 void display() {
-    gluPerspective(world.camera.fov, (float)world.window.width / world.window.height, world.camera.near, world.camera.far);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f(1.0f, 1.0f, 1.0f);
@@ -168,10 +167,9 @@ void display() {
     glRotatef(rotateAngle_lr, 0.0f, 1.0f, 0.0f);
     glRotatef(rotateAngle_ud, 0.0f, 0.0f, 1.0f);
     glTranslatef(translateX, translateY, translateZ);
-
     referencial();
     glMatrixMode(GL_MODELVIEW);
-
+    glColor3f(1.0f, 1.0f, 1.0f);
     // Render models
     for (const auto& model : world.models) {
         std::ifstream inputFile(model.filename);
@@ -206,7 +204,7 @@ void resize(int w, int h) {
 	
     glViewport(0, 0, w, h);
 
-	gluPerspective(45.0f ,ratio, 1.0f ,1000.0f);
+    gluPerspective(world.camera.fov, (float)world.window.width / world.window.height, world.camera.near, world.camera.far);
 
 	glMatrixMode(GL_MODELVIEW);
 }
