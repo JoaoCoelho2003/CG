@@ -6,5 +6,6 @@
 #include "Sphere.h"
 #include "World.h"
 #include "Box.h"
+#include "Torus.h"
 
 #endif /* ALL_HEADERS_H */

@@ -177,10 +177,9 @@ void display() {
             std::cerr << "Error opening model file: " << model.filename << std::endl;
             continue;
         }
-
         // Assuming each line in the model file represents a vertex with position, normal, and texture coordinate
         glBegin(GL_TRIANGLES);
-        float x, y, z, nx, ny, nz, s, t;
+        float x, y, z;
         while (inputFile >> x >> y >> z) {
             glVertex3f(x, y, z);
         }

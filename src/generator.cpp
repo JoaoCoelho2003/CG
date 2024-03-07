@@ -43,6 +43,16 @@ int main(int argc, char* argv[]) {
         box.generateVertices();
         box.writeToFile(outputFilename);
     }
+        else if (figure == "torus") {
+        float radius = std::stof(argv[2]);
+        float tube_radius = std::stof(argv[3]);
+        int slices = std::stof(argv[4]);
+        int stacks = std::stof(argv[5]);
+        std::string outputFilename = argv[6];
+        Torus torus(radius, tube_radius, slices, stacks);
+        torus.generateVertices();
+        torus.writeToFile(outputFilename);
+    }
     else {
         std::cerr << "Invalid figure: " << figure << std::endl;
         return 1;
