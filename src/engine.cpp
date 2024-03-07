@@ -145,6 +145,7 @@ void parseXML(const char* filename, World& world) {
                 if (modelElement->QueryStringAttribute("file", &filename) == tinyxml2::XML_SUCCESS) {
                     Model model;
                     model.filename = filename;
+                    model.vertices = {};
                     world.models.push_back(model);
                 }
             }
@@ -171,21 +172,43 @@ void display() {
     glMatrixMode(GL_MODELVIEW);
     glColor3f(1.0f, 1.0f, 1.0f);
     // Render models
+    int model_index = 0;
     for (const auto& model : world.models) {
-        std::ifstream inputFile(model.filename);
-        if (!inputFile.is_open()) {
-            std::cerr << "Error opening model file: " << model.filename << std::endl;
-            continue;
+        if (!model.vertices.empty()) {
+            glBegin(GL_TRIANGLES);
+            for (const auto& vertices : model.vertices) {
+                for (const auto& vertex : vertices) {
+                    glVertex3f(vertex.x, vertex.y, vertex.z);
+                }
+            }
+            glEnd();
         }
-        // Assuming each line in the model file represents a vertex with position, normal, and texture coordinate
-        glBegin(GL_TRIANGLES);
-        float x, y, z;
-        while (inputFile >> x >> y >> z) {
-            glVertex3f(x, y, z);
-        }
-        glEnd();
+        else {
+            std::ifstream inputFile(model.filename);
+            if (!inputFile.is_open()) {
+                std::cerr << "Error opening model file: " << model.filename << std::endl;
+                continue;
+            }
+            // Assuming each line in the model file represents a vertex with position (x, y, z)
+            glBegin(GL_TRIANGLES);
+            float x, y, z;
+            int vertices_number = 0;
+            std::vector<Vertex> vertices;
+            while (inputFile >> x >> y >> z) {
+                glVertex3f(x, y, z);
+                vertices.push_back({x, y, z});
+                vertices_number++;
+                if (vertices_number == 3) {
+                    world.models[model_index].vertices.push_back(vertices);
+                    vertices.clear();
+                    vertices_number = 0;
+                }
+            }
+            glEnd();
 
-        inputFile.close();
+            inputFile.close();
+        }
+        model_index++;
     }
 
     glutSwapBuffers();

@@ -4,8 +4,12 @@
 #include <vector>
 #include <string>
 
+struct Vertex {
+    float x, y, z;
+};
 struct Model {
     std::string filename;
+    std::vector<std::vector<Vertex>> vertices;
 };
 
 struct Camera {
