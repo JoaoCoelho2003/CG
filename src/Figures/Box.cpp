@@ -10,6 +10,7 @@
 Box::Box(float d, float div) : dimension(d), divisions(div) {}
 
 void Box::generateVertices() {
+    vertices.clear();
     // Calculate step size for divisions
     float step = dimension / divisions;
 

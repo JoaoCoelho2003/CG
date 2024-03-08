@@ -13,8 +13,6 @@ private:
     int stacks;
 
     std::vector<glm::vec3> vertices;
-    std::vector<float> normals;
-    std::vector<float> texCoords;
 
 public:
     Cone(float h, float r, int sl, int st);

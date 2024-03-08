@@ -9,8 +9,6 @@ Plane::Plane(float l, int d) : length(l), divisions(d) {}
 
 void Plane::generateVertices() {
     vertices.clear();
-    normals.clear();
-    texCoords.clear();
 
     float halfLength = length / 2;
     float divisionLength = length / divisions;
