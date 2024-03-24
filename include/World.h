@@ -4,12 +4,25 @@
 #include <vector>
 #include <string>
 
+enum class TransformationType {
+    TRANSLATE,
+    ROTATE,
+    SCALE
+};
+
+struct Transformation {
+    TransformationType type;
+    std::vector<float> values;
+};
+
 struct Vertex {
     float x, y, z;
 };
+
 struct Model {
     std::string filename;
     std::vector<std::vector<Vertex>> vertices;
+    std::vector<Transformation> transformations;
 };
 
 struct Camera {

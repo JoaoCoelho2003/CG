@@ -9,6 +9,9 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 add_executable(engine src/engine.cpp)
 add_executable(generator src/generator.cpp src/Figures/Sphere.cpp src/Figures/Cone.cpp  src/Figures/Plane.cpp src/Figures/Box.cpp src/Figures/Torus.cpp)
 
+# Add the -g flag to enable debugging symbols
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+
 find_package(OpenGL REQUIRED)
 include_directories(${OpenGL_INCLUDE_DIRS})
 link_directories(${OpenGL_LIBRARY_DIRS})

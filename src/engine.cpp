@@ -90,6 +90,60 @@ void keyboard_special(int key, int x, int y) {
     glutPostRedisplay();
 }
 
+void parseTransform(const tinyxml2::XMLElement* transformElement, Model& model) {
+    Transformation transform;
+
+    const char* type = transformElement->Value();
+    if (strcmp(type, "translate") == 0) {
+        transform.type = TransformationType::TRANSLATE;
+    } else if (strcmp(type, "rotate") == 0) {
+        transform.type = TransformationType::ROTATE;
+    } else if (strcmp(type, "scale") == 0) {
+        transform.type = TransformationType::SCALE;
+    } else {
+        return;
+    }
+
+    for (const tinyxml2::XMLElement* child = transformElement->FirstChildElement(); child; child = child->NextSiblingElement()) {
+        const char* value = child->Attribute("value");
+        if (value) {
+            float val = std::stof(value);
+            transform.values.push_back(val);
+        }
+    }
+
+    model.transformations.push_back(transform);
+}
+
+void parseModel(const tinyxml2::XMLElement* modelElement, Model& model) {
+    const char* filename = modelElement->Attribute("file");
+    if (filename) {
+        model.filename = filename;
+    }
+
+    for (const tinyxml2::XMLElement* child = modelElement->FirstChildElement(); child; child = child->NextSiblingElement()) {
+        const char* type = child->Value();
+        if (strcmp(type, "transform") == 0) {
+            parseTransform(child, model);
+        }
+    }
+}
+
+void parseGroup(const tinyxml2::XMLElement* groupElement, World& world) {
+    for (const tinyxml2::XMLElement* child = groupElement->FirstChildElement(); child; child = child->NextSiblingElement()) {
+        const char* type = child->Value();
+        if (strcmp(type, "models") == 0) {
+            for (const tinyxml2::XMLElement* modelElement = child->FirstChildElement("model"); modelElement; modelElement = modelElement->NextSiblingElement("model")) {
+                Model model;
+                parseModel(modelElement, model);
+                world.models.push_back(model);
+            }
+        } else if (strcmp(type, "group") == 0) {
+            parseGroup(child, world);
+        }
+    }
+}
+
 void parseXML(const char* filename, World& world) {
     tinyxml2::XMLDocument doc;
     if (doc.LoadFile(filename) != tinyxml2::XML_SUCCESS) {
@@ -103,7 +157,6 @@ void parseXML(const char* filename, World& world) {
         return;
     }
 
-    // Parse camera
     tinyxml2::XMLElement* cameraElement = root->FirstChildElement("camera");
     if (cameraElement) {
         world.camera = {
@@ -124,7 +177,6 @@ void parseXML(const char* filename, World& world) {
         std::cerr << "Error: Missing <camera> element in XML file." << std::endl;
     }
 
-    // Parse window
     tinyxml2::XMLElement* windowElement = root->FirstChildElement("window");
     if (windowElement) {
         world.window = {
@@ -135,46 +187,48 @@ void parseXML(const char* filename, World& world) {
         std::cerr << "Error: Missing <window> element in XML file." << std::endl;
     }
 
-    // Parse model files
     tinyxml2::XMLElement* groupElement = root->FirstChildElement("group");
-    if (groupElement) {
-        tinyxml2::XMLElement* modelsElement = groupElement->FirstChildElement("models");
-        if (modelsElement) {
-            for (tinyxml2::XMLElement* modelElement = modelsElement->FirstChildElement("model"); modelElement; modelElement = modelElement->NextSiblingElement("model")) {
-                const char* filename;
-                if (modelElement->QueryStringAttribute("file", &filename) == tinyxml2::XML_SUCCESS) {
-                    Model model;
-                    model.filename = filename;
-                    model.vertices = {};
-                    world.models.push_back(model);
-                }
-            }
-        }
+    if(groupElement) {
+        parseGroup(groupElement, world);
     }
 }
 
 void display() {
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f(1.0f, 1.0f, 1.0f);
     glLoadIdentity();
-
 
     gluLookAt(world.camera.posX, world.camera.posY, world.camera.posZ,
               world.camera.lookAtX, world.camera.lookAtY, world.camera.lookAtZ,
               world.camera.upX, world.camera.upY, world.camera.upZ);
 
-
+    // Apply global transformations
     glRotatef(rotateAngle_lr, 0.0f, 1.0f, 0.0f);
     glRotatef(rotateAngle_ud, 0.0f, 0.0f, 1.0f);
     glTranslatef(translateX, translateY, translateZ);
     referencial();
     glMatrixMode(GL_MODELVIEW);
     glColor3f(1.0f, 1.0f, 1.0f);
+
     // Render models
-    int model_index = 0;
     for (const auto& model : world.models) {
         if (!model.vertices.empty()) {
+            glPushMatrix();
+            // Apply model-specific transformations
+            for (const auto& transformation : model.transformations) {
+                switch (transformation.type) {
+                    case TransformationType::TRANSLATE:
+                        glTranslatef(transformation.values[0], transformation.values[1], transformation.values[2]);
+                        break;
+                    case TransformationType::ROTATE:
+                        glRotatef(transformation.values[0], transformation.values[1], transformation.values[2], transformation.values[3]);
+                        break;
+                    case TransformationType::SCALE:
+                        glScalef(transformation.values[0], transformation.values[1], transformation.values[2]);
+                        break;
+                }
+            }
+
             glBegin(GL_TRIANGLES);
             for (const auto& vertices : model.vertices) {
                 for (const auto& vertex : vertices) {
@@ -182,35 +236,48 @@ void display() {
                 }
             }
             glEnd();
-        }
-        else {
+
+            glPopMatrix();
+        } else {
             std::ifstream inputFile(model.filename);
             if (!inputFile.is_open()) {
                 std::cerr << "Error opening model file: " << model.filename << std::endl;
                 continue;
             }
-            // Assuming each line in the model file represents a vertex with position (x, y, z)
+
             glBegin(GL_TRIANGLES);
             float x, y, z;
-            int vertices_number = 0;
-            std::vector<Vertex> vertices;
             while (inputFile >> x >> y >> z) {
-                glVertex3f(x, y, z);
-                vertices.push_back({x, y, z});
-                vertices_number++;
-                if (vertices_number == 3) {
-                    world.models[model_index].vertices.push_back(vertices);
-                    vertices.clear();
-                    vertices_number = 0;
+                // Apply model-specific transformations
+                for (const auto& transformation : model.transformations) {
+                    switch (transformation.type) {
+                        case TransformationType::TRANSLATE:
+                            x += transformation.values[0];
+                            y += transformation.values[1];
+                            z += transformation.values[2];
+                            break;
+
+                        case TransformationType::ROTATE:
+                            glPushMatrix();
+                            glRotatef(transformation.values[0], transformation.values[1], transformation.values[2], transformation.values[3]);
+                            glVertex3f(x, y, z);
+                            glPopMatrix();
+                            break;
+
+                        case TransformationType::SCALE:
+                            x *= transformation.values[0];
+                            y *= transformation.values[1];
+                            z *= transformation.values[2];
+                            break;
+                    }
                 }
+                glVertex3f(x, y, z);
             }
             glEnd();
 
             inputFile.close();
         }
-        model_index++;
     }
-
     glutSwapBuffers();
 }
 
