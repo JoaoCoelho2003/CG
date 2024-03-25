@@ -3,17 +3,8 @@
 
 #include <vector>
 #include <string>
-
-enum class TransformationType {
-    TRANSLATE,
-    ROTATE,
-    SCALE
-};
-
-struct Transformation {
-    TransformationType type;
-    std::vector<float> values;
-};
+#include <map>
+#include "Tree.h"
 
 struct Vertex {
     float x, y, z;
@@ -22,7 +13,6 @@ struct Vertex {
 struct Model {
     std::string filename;
     std::vector<std::vector<Vertex>> vertices;
-    std::vector<Transformation> transformations;
 };
 
 struct Camera {
@@ -41,6 +31,7 @@ struct World {
     Camera camera;
     Window window;
     std::vector<Model> models;
+    Tree tree;
 };
 
 #endif
