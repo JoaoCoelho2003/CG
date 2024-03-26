@@ -218,17 +218,24 @@ void render_models(Tree tree, std::vector<Transformation> transformations = {}) 
             std::cerr << "Error opening model file: " << model_name << std::endl;
             continue;
         }
+        // init new model
+        world.models.push_back({model_name,transformations,{}});
+
         // Assuming each line in the model file represents a vertex with position (x, y, z)
         glBegin(GL_TRIANGLES);
         float x, y, z;
         int vertices_number = 0;
         std::vector<Vertex> vertices;
+        Triangle triangle;
         while (inputFile >> x >> y >> z) {
             glVertex3f(x, y, z);
             vertices.push_back({x, y, z});
             vertices_number++;
             if (vertices_number == 3) {
-                world.models[model_index].vertices.push_back(vertices);
+                triangle.v1 = vertices[0];
+                triangle.v2 = vertices[1];
+                triangle.v3 = vertices[2];
+                world.models[model_index].triangles.push_back(triangle);
                 vertices.clear();
                 vertices_number = 0;
             }
@@ -246,13 +253,50 @@ void render_models(Tree tree, std::vector<Transformation> transformations = {}) 
 
 void render_loaded_models(std::vector<Model>& models) {
     for (const auto& model : models) {
-        for (const auto& vertices : model.vertices) {
-            glBegin(GL_TRIANGLES);
-            for (const auto& vertex : vertices) {
-                glVertex3f(vertex.x, vertex.y, vertex.z);
+        //  print whole model
+        std::cout << "Model: " << model.filename << std::endl;
+        for (const auto& transform : model.transformations) {
+            std::cout << "  Transformation: ";
+            switch (transform.type) {
+                case TransformationType::TRANSLATE:
+                    std::cout << "Translate ";
+                    break;
+                case TransformationType::ROTATE:
+                    std::cout << "Rotate ";
+                    break;
+                case TransformationType::SCALE:
+                    std::cout << "Scale ";
+                    break;
             }
+            for (const auto& value : transform.values) {
+                std::cout << value << " ";
+            }
+            std::cout << std::endl;
+        }
+
+        glPushMatrix();
+        for (const auto& transform : model.transformations) {
+            switch (transform.type) {
+                case TransformationType::TRANSLATE:
+                    glTranslatef(transform.values[0], transform.values[1], transform.values[2]);
+                    break;
+                case TransformationType::ROTATE:
+                    glRotatef(transform.values[0], transform.values[1], transform.values[2], transform.values[3]);
+                    break;
+                case TransformationType::SCALE:
+                    glScalef(transform.values[0], transform.values[1], transform.values[2]);
+                    break;
+            }
+        }
+
+        for (const auto& triangle : model.triangles) {
+            glBegin(GL_TRIANGLES);
+            glVertex3f(triangle.v1.x, triangle.v1.y, triangle.v1.z);
+            glVertex3f(triangle.v2.x, triangle.v2.y, triangle.v2.z);
+            glVertex3f(triangle.v3.x, triangle.v3.y, triangle.v3.z);
             glEnd();
         }
+        glPopMatrix();
     }
 }
 
@@ -270,7 +314,6 @@ void display() {
     glRotatef(rotateAngle_ud, 0.0f, 0.0f, 1.0f);
     glTranslatef(translateX, translateY, translateZ);    
     referencial();
-    glMatrixMode(GL_MODELVIEW);
     glColor3f(1.0f, 1.0f, 1.0f);
 
 
