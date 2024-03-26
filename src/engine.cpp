@@ -90,61 +90,56 @@ void keyboard_special(int key, int x, int y) {
     glutPostRedisplay();
 }
 
-void parseTransform(const tinyxml2::XMLElement* transformElement, Model& model) {
-    Transformation transform;
-
-    const char* type = transformElement->Value();
-    if (strcmp(type, "translate") == 0) {
-        transform.type = TransformationType::TRANSLATE;
-    } else if (strcmp(type, "rotate") == 0) {
-        transform.type = TransformationType::ROTATE;
-    } else if (strcmp(type, "scale") == 0) {
-        transform.type = TransformationType::SCALE;
-    } else {
-        return;
-    }
-
+void parseTransform(const tinyxml2::XMLElement* transformElement, Node& node) {
     for (const tinyxml2::XMLElement* child = transformElement->FirstChildElement(); child; child = child->NextSiblingElement()) {
-        const char* value = child->Attribute("value");
-        if (value) {
-            float val = std::stof(value);
-            transform.values.push_back(val);
-        }
-    }
-
-    model.transformations.push_back(transform);
-}
-
-void parseModel(const tinyxml2::XMLElement* modelElement, Model& model) {
-    const char* filename = modelElement->Attribute("file");
-    if (filename) {
-        model.filename = filename;
-    }
-
-    for (const tinyxml2::XMLElement* child = modelElement->FirstChildElement(); child; child = child->NextSiblingElement()) {
         const char* type = child->Value();
-        if (strcmp(type, "transform") == 0) {
-            parseTransform(child, model);
+        Transformation transform;
+        if (strcmp(type, "translate") == 0) {
+            transform.type = TransformationType::TRANSLATE;
+        } else if (strcmp(type, "rotate") == 0) {
+            transform.type = TransformationType::ROTATE;
+            transform.values.push_back(child->FloatAttribute("angle"));
+        } else if (strcmp(type, "scale") == 0) {
+            transform.type = TransformationType::SCALE;
+        }
+        else {
+            std::cerr << "Error: Unknown transformation type: " << type << std::endl;
+            continue;
+        }
+        transform.values.push_back(child->FloatAttribute("x"));
+        transform.values.push_back(child->FloatAttribute("y"));
+        transform.values.push_back(child->FloatAttribute("z"));
+        node.transformations.push_back(transform);
+    }   
+}
+
+void parseModel(const tinyxml2::XMLElement* modelElement, Node& node) {
+    for(const tinyxml2::XMLElement* child = modelElement->FirstChildElement(); child; child = child->NextSiblingElement()) {   
+        const char* filename = child->Attribute("file");
+        if (filename) {
+            node.model_name.push_back(filename);
         }
     }
 }
 
-void parseGroup(const tinyxml2::XMLElement* groupElement, World& world) {
+void parseGroup(const tinyxml2::XMLElement* groupElement, Tree& tree) {
     for (const tinyxml2::XMLElement* child = groupElement->FirstChildElement(); child; child = child->NextSiblingElement()) {
         const char* type = child->Value();
-        if (strcmp(type, "models") == 0) {
-            for (const tinyxml2::XMLElement* modelElement = child->FirstChildElement("model"); modelElement; modelElement = modelElement->NextSiblingElement("model")) {
-                Model model;
-                parseModel(modelElement, model);
-                world.models.push_back(model);
-            }
+        if (strcmp(type, "transform") == 0) {
+            parseTransform(child, tree.node);
+        } else if (strcmp(type, "models") == 0) {
+            parseModel(child, tree.node);
         } else if (strcmp(type, "group") == 0) {
-            parseGroup(child, world);
+            Tree subtree;
+            parseGroup(child, subtree);
+            tree.children.push_back(subtree);
+        } else {
+            std::cerr << "Error: Unknown element type: " << type << std::endl;
         }
     }
 }
 
-void parseXML(const char* filename, World& world) {
+void parseXML(const char* filename, World& tree) {
     tinyxml2::XMLDocument doc;
     if (doc.LoadFile(filename) != tinyxml2::XML_SUCCESS) {
         std::cerr << "Error loading XML file." << std::endl;
@@ -189,7 +184,83 @@ void parseXML(const char* filename, World& world) {
 
     tinyxml2::XMLElement* groupElement = root->FirstChildElement("group");
     if(groupElement) {
-        parseGroup(groupElement, world);
+        parseGroup(groupElement, world.tree);
+    }
+}
+
+void render_loaded_model(Model model) {
+    for (const auto& triangle : model.triangles) {
+        glVertex3f(triangle.v1.x, triangle.v1.y, triangle.v1.z);
+        glVertex3f(triangle.v2.x, triangle.v2.y, triangle.v2.z);
+        glVertex3f(triangle.v3.x, triangle.v3.y, triangle.v3.z);
+    }
+}
+
+void render_models(Tree tree, std::vector<Transformation> transformations = {}) {
+    // push new transformations
+    for (auto& transform : tree.node.transformations) {
+        transformations.push_back(transform);
+    }
+
+    glPushMatrix();
+    for (const auto& transformation : transformations) {
+        switch (transformation.type) {
+            case TransformationType::TRANSLATE:
+                glTranslatef(transformation.values[0], transformation.values[1], transformation.values[2]);
+                break;
+
+            case TransformationType::ROTATE:
+                glRotatef(transformation.values[0], transformation.values[1], transformation.values[2], transformation.values[3]);
+                break;
+
+            case TransformationType::SCALE:
+                glScalef(transformation.values[0], transformation.values[1], transformation.values[2]);
+                break;
+        }
+    }
+    for (const auto& model_name : tree.node.model_name) {
+        glBegin(GL_TRIANGLES);  
+        // model already loaded
+        if (!(world.models.find(model_name) == world.models.end())) {
+            render_loaded_model(world.models[model_name]);   
+        }
+        // load model
+        else {
+            std::cout << "Loading model: " << model_name << std::endl;
+            std::ifstream inputFile(model_name);
+            if (!inputFile.is_open()) {
+                std::cerr << "Error opening model file: " << model_name << std::endl;
+                continue;
+            }
+            // init new model
+            world.models[model_name] = {model_name, {}};
+
+            // Assuming each line in the model file represents a vertex with position (x, y, z)
+            float x, y, z;
+            int vertices_number = 0;
+            std::vector<Vertex> vertices;
+            Triangle triangle;
+            while (inputFile >> x >> y >> z) {
+                glVertex3f(x, y, z);
+                vertices.push_back({x, y, z});
+                vertices_number++;
+                if (vertices_number == 3) {
+                    triangle.v1 = vertices[0];
+                    triangle.v2 = vertices[1];
+                    triangle.v3 = vertices[2];
+                    world.models[model_name].triangles.push_back(triangle);
+                    vertices.clear();
+                    vertices_number = 0;
+                }
+            }
+            inputFile.close();
+        }
+        glEnd();
+        glPopMatrix();
+    }
+    // render child models
+    for (auto& child : tree.children) {
+        render_models(child, transformations);
     }
 }
 
@@ -205,79 +276,12 @@ void display() {
     // Apply global transformations
     glRotatef(rotateAngle_lr, 0.0f, 1.0f, 0.0f);
     glRotatef(rotateAngle_ud, 0.0f, 0.0f, 1.0f);
-    glTranslatef(translateX, translateY, translateZ);
+    glTranslatef(translateX, translateY, translateZ);    
     referencial();
-    glMatrixMode(GL_MODELVIEW);
     glColor3f(1.0f, 1.0f, 1.0f);
 
-    // Render models
-    for (const auto& model : world.models) {
-        if (!model.vertices.empty()) {
-            glPushMatrix();
-            // Apply model-specific transformations
-            for (const auto& transformation : model.transformations) {
-                switch (transformation.type) {
-                    case TransformationType::TRANSLATE:
-                        glTranslatef(transformation.values[0], transformation.values[1], transformation.values[2]);
-                        break;
-                    case TransformationType::ROTATE:
-                        glRotatef(transformation.values[0], transformation.values[1], transformation.values[2], transformation.values[3]);
-                        break;
-                    case TransformationType::SCALE:
-                        glScalef(transformation.values[0], transformation.values[1], transformation.values[2]);
-                        break;
-                }
-            }
+    render_models(world.tree);
 
-            glBegin(GL_TRIANGLES);
-            for (const auto& vertices : model.vertices) {
-                for (const auto& vertex : vertices) {
-                    glVertex3f(vertex.x, vertex.y, vertex.z);
-                }
-            }
-            glEnd();
-
-            glPopMatrix();
-        } else {
-            std::ifstream inputFile(model.filename);
-            if (!inputFile.is_open()) {
-                std::cerr << "Error opening model file: " << model.filename << std::endl;
-                continue;
-            }
-
-            glBegin(GL_TRIANGLES);
-            float x, y, z;
-            while (inputFile >> x >> y >> z) {
-                // Apply model-specific transformations
-                for (const auto& transformation : model.transformations) {
-                    switch (transformation.type) {
-                        case TransformationType::TRANSLATE:
-                            x += transformation.values[0];
-                            y += transformation.values[1];
-                            z += transformation.values[2];
-                            break;
-
-                        case TransformationType::ROTATE:
-                            glPushMatrix();
-                            glRotatef(transformation.values[0], transformation.values[1], transformation.values[2], transformation.values[3]);
-                            glVertex3f(x, y, z);
-                            glPopMatrix();
-                            break;
-
-                        case TransformationType::SCALE:
-                            x *= transformation.values[0];
-                            y *= transformation.values[1];
-                            z *= transformation.values[2];
-                            break;
-                    }
-                }
-                glVertex3f(x, y, z);
-            }
-            glEnd();
-
-            inputFile.close();
-        }
-    }
     glutSwapBuffers();
 }
 
@@ -296,6 +300,43 @@ void resize(int w, int h) {
     gluPerspective(world.camera.fov, (float)world.window.width / world.window.height, world.camera.near, world.camera.far);
 
 	glMatrixMode(GL_MODELVIEW);
+}
+
+void printTree(Tree tree, int level) {
+    for (int i = 0; i < level; i++) {
+        std::cout << "  ";
+    }
+    std::cout << "Group" << std::endl;
+    for (const auto& transform : tree.node.transformations) {
+        for (int i = 0; i < level; i++) {
+            std::cout << "  ";
+        }
+        std::cout << "  Transformation: ";
+        switch (transform.type) {
+            case TransformationType::TRANSLATE:
+                std::cout << "Translate ";
+                break;
+            case TransformationType::ROTATE:
+                std::cout << "Rotate ";
+                break;
+            case TransformationType::SCALE:
+                std::cout << "Scale ";
+                break;
+        }
+        for (const auto& value : transform.values) {
+            std::cout << value << " ";
+        }
+        std::cout << std::endl;
+    }
+    for (const auto& model : tree.node.model_name) {
+        for (int i = 0; i < level; i++) {
+            std::cout << "  ";
+        }
+        std::cout << "  Model: " << model << std::endl;
+    }
+    for (const auto& child : tree.children) {
+        printTree(child, level + 1);
+    }
 }
 
 int main(int argc, char* argv[]) {
@@ -325,6 +366,8 @@ int main(int argc, char* argv[]) {
     const char* configFile = argv[1];
 
     parseXML(configFile, world);
+
+    printTree(world.tree, 0);
 
     glutMainLoop();
 
