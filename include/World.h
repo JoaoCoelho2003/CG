@@ -16,7 +16,6 @@ struct Triangle {
 
 struct Model {
     std::string filename;
-    std::vector<Transformation> transformations;
     std::vector<Triangle> triangles;
 };
 
@@ -35,7 +34,7 @@ struct Window {
 struct World {
     Camera camera;
     Window window;
-    std::vector<Model> models;
+    std::map<std::string, Model> models;
     Tree tree;
 };
 
