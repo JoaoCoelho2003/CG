@@ -211,15 +211,16 @@ void render_models(Tree tree, std::vector<Transformation> transformations = {}) 
         }
     }
     for (const auto& model_name : tree.node.model_name) {
-        glBegin(GL_TRIANGLES);
 
         // model already loaded
         if (world.models.find(model_name) == world.models.end()) {
+            glBegin(GL_TRIANGLES);
             for (const auto& triangle : world.models[model_name].triangles) {
                 glVertex3f(triangle.v1.x, triangle.v1.y, triangle.v1.z);
                 glVertex3f(triangle.v2.x, triangle.v2.y, triangle.v2.z);
                 glVertex3f(triangle.v3.x, triangle.v3.y, triangle.v3.z);
             }
+            glEnd();
         }
         // load model
         else {
@@ -232,6 +233,7 @@ void render_models(Tree tree, std::vector<Transformation> transformations = {}) 
             world.models[model_name] = {model_name, {}};
 
             // Assuming each line in the model file represents a vertex with position (x, y, z)
+            glBegin(GL_TRIANGLES);
             float x, y, z;
             int vertices_number = 0;
             std::vector<Vertex> vertices;
@@ -249,9 +251,9 @@ void render_models(Tree tree, std::vector<Transformation> transformations = {}) 
                     vertices_number = 0;
                 }
             }
+            glEnd();
             inputFile.close();
         }
-        glEnd();
         glPopMatrix();
     }
     // render child models
