@@ -210,7 +210,6 @@ void render_models(Tree tree, std::vector<Transformation> transformations = {}) 
                 break;
         }
     }
-    glPopMatrix();
     int model_index = 0;
     for (const auto& model_name : tree.node.model_name) {
         std::ifstream inputFile(model_name);
@@ -244,6 +243,7 @@ void render_models(Tree tree, std::vector<Transformation> transformations = {}) 
 
         inputFile.close();
         model_index++;
+        glPopMatrix();
     }
     // render child models
     for (auto& child : tree.children) {
