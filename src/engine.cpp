@@ -15,6 +15,8 @@ float translateY = 0.0f;
 float rotateAngle_lr = 0.0f;
 float rotateAngle_ud = 0.0f;
 float scaleHeight = 1.0f;
+float movementSpeed = 0.1f;
+const float rotationSpeed = 0.1f;
 
 void referencial() {
     glBegin(GL_LINES);
@@ -34,37 +36,110 @@ void referencial() {
 }
 
 void keyboard_movement(unsigned char key, int x, int y) {
+    float forwardX = world.camera.lookAtX - world.camera.posX;
+    float forwardY = world.camera.lookAtY - world.camera.posY;
+    float forwardZ = world.camera.lookAtZ - world.camera.posZ;
+
+    float length = sqrt(forwardX * forwardX + forwardY * forwardY + forwardZ * forwardZ);
+    if (length != 0.0f) {
+        forwardX /= length;
+        forwardY /= length;
+        forwardZ /= length;
+    }
+
+    float rightX = world.camera.upY * forwardZ - world.camera.upZ * forwardY;
+    float rightY = world.camera.upZ * forwardX - world.camera.upX * forwardZ;
+    float rightZ = world.camera.upX * forwardY - world.camera.upY * forwardX;
+
+    float rightLength = sqrt(rightX * rightX + rightY * rightY + rightZ * rightZ);
+    if (rightLength != 0.0f) {
+        rightX /= rightLength;
+        rightY /= rightLength;
+        rightZ /= rightLength;
+    }
+
     switch (key) {
-        case 'w':
-            translateZ += 0.2f;
+        case 'w': {
+            translateX -= movementSpeed * forwardX;
+            translateY -= movementSpeed * forwardY;
+            translateZ -= movementSpeed * forwardZ;
             break;
-        case 's':
-            translateZ -= 0.2f;
+        }
+        case 's': {
+            translateX += movementSpeed * forwardX;
+            translateY += movementSpeed * forwardY;
+            translateZ += movementSpeed * forwardZ;
             break;
-        case 'a':
-            translateX += 0.2f;
+        }
+        case 'a': {
+            translateX -= movementSpeed * rightX;
+            translateY -= movementSpeed * rightY;
+            translateZ -= movementSpeed * rightZ;
             break;
-        case 'd':
-            translateX -= 0.2f;
+        }
+        case 'd': {
+            translateX += movementSpeed * rightX;
+            translateY += movementSpeed * rightY;
+            translateZ += movementSpeed * rightZ;
             break;
-        case 'z':
-            scaleHeight *= 1.1f;
-            break;
-        case 'x':
-            scaleHeight *= 0.9f;
-            break;
+        }
         case '1':
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             break;
         case '2':
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             break;
         case '3':
             glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
             break;
+        case '+':
+            movementSpeed += 0.1f;
+            break;
+        case '-':
+            movementSpeed -= 0.1f;
+            break;
     }
+
     glutPostRedisplay();
 }
+
+
+
+void mouse_movement(int x, int y) {
+    static int lastX = -1;
+    static int lastY = -1;
+
+    if (lastX == -1) {
+        lastX = x;
+        lastY = y;
+    }
+
+    int deltaX = x - lastX;
+    int deltaY = y - lastY;
+
+    float sensitivity = 0.01f;
+
+    float pitchAngle = world.camera.lookAtY - world.camera.posY;
+    sensitivity *= std::max(0.1f, 1.0f - std::abs(pitchAngle / 90.0f));
+
+    float lookAtDeltaX = sensitivity * deltaX;
+    float lookAtDeltaY = -sensitivity * deltaY;
+
+    world.camera.lookAtX += lookAtDeltaX;
+    world.camera.lookAtY += lookAtDeltaY;
+
+    if (world.camera.lookAtY > 89.0f) {
+        world.camera.lookAtY = 89.0f;
+    } else if (world.camera.lookAtY < -89.0f) {
+        world.camera.lookAtY = -89.0f;
+    }
+
+    lastX = x;
+    lastY = y;
+
+    glutPostRedisplay();
+}
+
 
 void keyboard_special(int key, int x, int y) {
     switch (key) {
@@ -286,20 +361,24 @@ void display() {
 }
 
 void resize(int w, int h) {
+    if (h == 0) {
+        h = 1;
+    }
 
-	if(h == 0)
-		h = 1;
+    float aspectRatio = (float)w / h;
 
-	float ratio = w * 1.0 / h;
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    
+    if (aspectRatio >= 1) {
+        glViewport(0, 0, w, h);
+        gluPerspective(world.camera.fov, aspectRatio, world.camera.near, world.camera.far);
+    } else {
+        glViewport(0, 0, w, w / aspectRatio);
+        gluPerspective(world.camera.fov, aspectRatio, world.camera.near, world.camera.far);
+    }
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	
-    glViewport(0, 0, w, h);
-
-    gluPerspective(world.camera.fov, (float)world.window.width / world.window.height, world.camera.near, world.camera.far);
-
-	glMatrixMode(GL_MODELVIEW);
+    glMatrixMode(GL_MODELVIEW);
 }
 
 void printTree(Tree tree, int level) {
@@ -355,6 +434,7 @@ int main(int argc, char* argv[]) {
 
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard_movement);
+    glutPassiveMotionFunc(mouse_movement);
     glutSpecialFunc(keyboard_special);
     glutReshapeFunc(resize);
 
