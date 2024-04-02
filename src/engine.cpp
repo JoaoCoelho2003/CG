@@ -16,7 +16,7 @@ float rotateAngle_lr = 0.0f;
 float rotateAngle_ud = 0.0f;
 float scaleHeight = 1.0f;
 float movementSpeed = 0.1f;
-const float rotationSpeed = 0.1f;
+bool cursorVisible = true;
 
 void referencial() {
     glBegin(GL_LINES);
@@ -35,7 +35,20 @@ void referencial() {
     glEnd();
 }
 
+
+void mouse_click(int button, int state, int x, int y) {
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        glutSetCursor(GLUT_CURSOR_NONE);
+        cursorVisible = false;
+    }
+}
+
 void keyboard_movement(unsigned char key, int x, int y) {
+    if (key == 27) {
+        glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
+        cursorVisible = true;
+    }
+
     float forwardX = world.camera.lookAtX - world.camera.posX;
     float forwardY = world.camera.lookAtY - world.camera.posY;
     float forwardZ = world.camera.lookAtZ - world.camera.posZ;
@@ -106,39 +119,35 @@ void keyboard_movement(unsigned char key, int x, int y) {
 
 
 void mouse_movement(int x, int y) {
-    static int lastX = -1;
-    static int lastY = -1;
+    static int centerX = glutGet(GLUT_WINDOW_WIDTH) / 2;
+    static int centerY = glutGet(GLUT_WINDOW_HEIGHT) / 2;
 
-    if (lastX == -1) {
-        lastX = x;
-        lastY = y;
+    if (!cursorVisible) {
+        int deltaX = x - centerX;
+        int deltaY = y - centerY;
+
+        if (deltaX != 0 || deltaY != 0) {
+            float sensitivity = 0.01f;
+
+            float lookAtDeltaX = sensitivity * deltaX;
+            float lookAtDeltaY = -sensitivity * deltaY;
+
+            world.camera.lookAtX += lookAtDeltaX;
+            world.camera.lookAtY += lookAtDeltaY;
+
+            if (world.camera.lookAtY > 89.0f) {
+                world.camera.lookAtY = 89.0f;
+            } else if (world.camera.lookAtY < -89.0f) {
+                world.camera.lookAtY = -89.0f;
+            }
+
+            glutWarpPointer(centerX, centerY);
+        }
     }
-
-    int deltaX = x - lastX;
-    int deltaY = y - lastY;
-
-    float sensitivity = 0.01f;
-
-    float pitchAngle = world.camera.lookAtY - world.camera.posY;
-    sensitivity *= std::max(0.1f, 1.0f - std::abs(pitchAngle / 90.0f));
-
-    float lookAtDeltaX = sensitivity * deltaX;
-    float lookAtDeltaY = -sensitivity * deltaY;
-
-    world.camera.lookAtX += lookAtDeltaX;
-    world.camera.lookAtY += lookAtDeltaY;
-
-    if (world.camera.lookAtY > 89.0f) {
-        world.camera.lookAtY = 89.0f;
-    } else if (world.camera.lookAtY < -89.0f) {
-        world.camera.lookAtY = -89.0f;
-    }
-
-    lastX = x;
-    lastY = y;
 
     glutPostRedisplay();
 }
+
 
 
 void keyboard_special(int key, int x, int y) {
@@ -435,6 +444,7 @@ int main(int argc, char* argv[]) {
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard_movement);
     glutPassiveMotionFunc(mouse_movement);
+    glutMouseFunc(mouse_click);
     glutSpecialFunc(keyboard_special);
     glutReshapeFunc(resize);
 
