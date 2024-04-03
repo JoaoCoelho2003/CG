@@ -287,6 +287,7 @@ void render_models(Tree tree, std::vector<Transformation> transformations = {}) 
     }
 
     glPushMatrix();
+
     for (const auto& transformation : transformations) {
         switch (transformation.type) {
             case TransformationType::TRANSLATE:
@@ -340,8 +341,10 @@ void render_models(Tree tree, std::vector<Transformation> transformations = {}) 
             inputFile.close();
         }
         glEnd();
-        glPopMatrix();
     }
+
+    glPopMatrix();
+    
     // render child models
     for (auto& child : tree.children) {
         render_models(child, transformations);
