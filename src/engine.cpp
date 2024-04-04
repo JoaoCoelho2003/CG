@@ -17,6 +17,7 @@ float rotateAngle_ud = 0.0f;
 float scaleHeight = 1.0f;
 float movementSpeed = 0.1f;
 bool cursorVisible = true;
+bool showReferenceAxes = true;
 
 void referencial() {
     glBegin(GL_LINES);
@@ -169,6 +170,9 @@ void keyboard_special(int key, int x, int y) {
             break;
         case GLUT_KEY_DOWN:
             rotateAngle_ud -= 1.0f;
+            break;
+        case GLUT_KEY_F1:
+            showReferenceAxes = !showReferenceAxes;
             break;
     }
     glutPostRedisplay();
@@ -364,7 +368,10 @@ void display() {
     glRotatef(rotateAngle_lr, 0.0f, 1.0f, 0.0f);
     glRotatef(rotateAngle_ud, 0.0f, 0.0f, 1.0f);
     glTranslatef(translateX, translateY, translateZ);    
-    referencial();
+
+    if(showReferenceAxes){
+        referencial();
+    }
     glColor3f(1.0f, 1.0f, 1.0f);
 
     render_models(world.tree);

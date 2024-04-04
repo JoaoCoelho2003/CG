@@ -91,7 +91,7 @@
             <models>
                 <!-- Torus representing rings -->
                 <model file="templateSphere.3d" />
-                <model file="templateTorus.3d" /> <!-- ./generator torus 20.0 1.0 24 24 templateTorus.3d  -->
+                <model file="templateTorus.3d" /> <!-- ./generator torus 20.0 6.0 24 2 templateTorus.3d  -->
             </models>
         </group>
 
