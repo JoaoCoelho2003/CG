@@ -48,6 +48,16 @@
             <models>
                 <model file="templateSphere.3d" />
             </models>
+            <!-- Moon -->
+            <group>
+                <transform>
+                    <translate x="12" y="0" z="0" />
+                    <scale x="0.025" y="0.025" z="0.025" />
+                </transform>
+                <models>
+                    <model file="templateSphere.3d" />
+                </models>
+            </group>
         </group>
 
         <!-- Mars -->
@@ -79,7 +89,9 @@
                 <scale x="0.300" y="0.300" z="0.300" />
             </transform>
             <models>
+                <!-- Torus representing rings -->
                 <model file="templateSphere.3d" />
+                <model file="templateTorus.3d" /> <!-- ./generator torus 20.0 1.0 24 24 templateTorus.3d  -->
             </models>
         </group>
 

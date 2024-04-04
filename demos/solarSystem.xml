@@ -1,7 +1,7 @@
 <world>
     <window width="800" height="600" />
     <camera>
-        <position x="50" y="50" z="200" />
+        <position x="200" y="50" z="650" />
         <lookAt x="0" y="0" z="0" />
         <up x="0" y="1" z="0" />
         <projection fov="60" near="1" far="1000" />
@@ -20,7 +20,7 @@
         <!-- Mercury -->
         <group>
             <transform>
-                <translate x="20" y="0" z="-300" />
+                <translate x="20" y="0" z="100" /> <!-- Adjusted position -->
                 <scale x="0.040" y="0.040" z="0.040" />
             </transform>
             <models>
@@ -31,7 +31,7 @@
         <!-- Venus -->
         <group>
             <transform>
-                <translate x="35" y="0" z="10" />
+                <translate x="35" y="0" z="150" /> <!-- Adjusted position -->
                 <scale x="0.080" y="0.080" z="0.080" />
             </transform>
             <models>
@@ -42,18 +42,28 @@
         <!-- Earth -->
         <group>
             <transform>
-                <translate x="50" y="0" z="25" />
+                <translate x="45" y="0" z="30" /> <!-- Adjusted position -->
                 <scale x="0.100" y="0.100" z="0.100" />
             </transform>
             <models>
                 <model file="templateSphere.3d" />
             </models>
+            <!-- Moon -->
+            <group>
+                <transform>
+                    <translate x="15" y="0" z="10" /> <!-- Adjusted position -->
+                    <scale x="0.025" y="0.025" z="0.025" />
+                </transform>
+                <models>
+                    <model file="templateSphere.3d" />
+                </models>
+            </group>
         </group>
 
         <!-- Mars -->
         <group>
             <transform>
-                <translate x="70" y="0" z="-55" />
+                <translate x="60" y="0" z="200" /> <!-- Adjusted position -->
                 <scale x="0.060" y="0.060" z="0.060" />
             </transform>
             <models>
@@ -64,7 +74,7 @@
         <!-- Jupiter -->
         <group>
             <transform>
-                <translate x="100" y="0" z="120" />
+                <translate x="80" y="0" z="100" /> <!-- Adjusted position -->
                 <scale x="0.350" y="0.350" z="0.350" /> 
             </transform>
             <models>
@@ -75,18 +85,20 @@
         <!-- Saturn -->
         <group>
             <transform>
-                <translate x="150" y="0" z="240" />
+                <translate x="110" y="0" z="-50" /> <!-- Adjusted position -->
                 <scale x="0.300" y="0.300" z="0.300" />
             </transform>
             <models>
+                <!-- Torus representing rings -->
                 <model file="templateSphere.3d" />
+                <model file="templateTorus.3d" /> <!-- ./generator torus 20.0 1.0 24 24 templateTorus.3d  -->
             </models>
         </group>
 
         <!-- Uranus -->
         <group>
             <transform>
-                <translate x="220" y="0" z="190" />
+                <translate x="140" y="0" z="-100" /> <!-- Adjusted position -->
                 <scale x="0.150" y="0.150" z="0.150" />
             </transform>
             <models>
@@ -97,7 +109,7 @@
         <!-- Neptune -->
         <group>
             <transform>
-                <translate x="300" y="0" z="-10" />
+                <translate x="180" y="0" z="150" /> <!-- Adjusted position -->
                 <scale x="0.140" y="0.140" z="0.140" />
             </transform>
             <models>
