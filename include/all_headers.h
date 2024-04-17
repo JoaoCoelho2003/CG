@@ -7,5 +7,6 @@
 #include "World.h"
 #include "Box.h"
 #include "Torus.h"
+#include "Patch.h"
 
 #endif /* ALL_HEADERS_H */

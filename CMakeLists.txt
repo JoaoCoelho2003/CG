@@ -7,7 +7,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Add engine.cpp and generator.cpp as separate executables
 add_executable(engine src/engine.cpp)
-add_executable(generator src/generator.cpp src/Figures/Sphere.cpp src/Figures/Cone.cpp  src/Figures/Plane.cpp src/Figures/Box.cpp src/Figures/Torus.cpp)
+add_executable(generator src/generator.cpp src/Figures/Sphere.cpp src/Figures/Cone.cpp  src/Figures/Plane.cpp src/Figures/Box.cpp src/Figures/Torus.cpp src/Figures/Patch.cpp)
 
 # Add the -g flag to enable debugging symbols
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
