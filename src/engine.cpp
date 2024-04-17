@@ -4,6 +4,7 @@
 #include <fstream>
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <GL/glew.h>
 #include <GL/glut.h>
 #include "../include/World.h"
 
@@ -276,16 +277,7 @@ void parseXML(const char* filename, World& tree) {
     }
 }
 
-void render_loaded_model(Model model) {
-    for (const auto& triangle : model.triangles) {
-        glVertex3f(triangle.v1.x, triangle.v1.y, triangle.v1.z);
-        glVertex3f(triangle.v2.x, triangle.v2.y, triangle.v2.z);
-        glVertex3f(triangle.v3.x, triangle.v3.y, triangle.v3.z);
-    }
-}
-
 void render_models(Tree tree, std::vector<Transformation> transformations = {}) {
-    // push new transformations
     for (auto& transform : tree.node.transformations) {
         transformations.push_back(transform);
     }
@@ -307,49 +299,41 @@ void render_models(Tree tree, std::vector<Transformation> transformations = {}) 
                 break;
         }
     }
+
     for (const auto& model_name : tree.node.model_name) {
-        glBegin(GL_TRIANGLES);  
-        // model already loaded
-        if (!(world.models.find(model_name) == world.models.end())) {
-            render_loaded_model(world.models[model_name]);   
-        }
-        // load model
-        else {
+        Model& model = world.models[model_name];
+        if (model.vbo == 0) {
             std::cout << "Loading model: " << model_name << std::endl;
             std::ifstream inputFile(model_name);
             if (!inputFile.is_open()) {
                 std::cerr << "Error opening model file: " << model_name << std::endl;
                 continue;
             }
-            // init new model
-            world.models[model_name] = {model_name, {}};
 
-            // Assuming each line in the model file represents a vertex with position (x, y, z)
             float x, y, z;
-            int vertices_number = 0;
-            std::vector<Vertex> vertices;
             Triangle triangle;
+            std::vector<Vertex> vertices;
             while (inputFile >> x >> y >> z) {
-                glVertex3f(x, y, z);
                 vertices.push_back({x, y, z});
-                vertices_number++;
-                if (vertices_number == 3) {
-                    triangle.v1 = vertices[0];
-                    triangle.v2 = vertices[1];
-                    triangle.v3 = vertices[2];
-                    world.models[model_name].triangles.push_back(triangle);
-                    vertices.clear();
-                    vertices_number = 0;
-                }
             }
             inputFile.close();
+
+            glGenBuffers(1, &model.vbo);
+            glBindBuffer(GL_ARRAY_BUFFER, model.vbo);
+            glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+            model.triangles.resize(vertices.size() / 3);
         }
-        glEnd();
+
+        glBindBuffer(GL_ARRAY_BUFFER, model.vbo);
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glVertexPointer(3, GL_FLOAT, sizeof(Vertex), nullptr);
+        glDrawArrays(GL_TRIANGLES, 0, model.triangles.size() * 3);
+        glDisableClientState(GL_VERTEX_ARRAY);
     }
 
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glPopMatrix();
-    
-    // render child models
+
     for (auto& child : tree.children) {
         render_models(child, transformations);
     }
@@ -443,6 +427,12 @@ int main(int argc, char* argv[]) {
     glutInitWindowPosition(100, 100);
     glutInitWindowSize(800, 800);
     glutCreateWindow("Engine");
+
+    GLenum err = glewInit();
+    if (err != GLEW_OK) {
+        fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+    }
+    
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);

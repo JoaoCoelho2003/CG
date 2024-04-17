@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include "Tree.h"
+#include <GL/glew.h>
 
 struct Vertex {
     float x, y, z;
@@ -17,6 +18,7 @@ struct Triangle {
 struct Model {
     std::string filename;
     std::vector<Triangle> triangles;
+    GLuint vbo;
 };
 
 struct Camera {
