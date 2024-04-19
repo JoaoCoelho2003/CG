@@ -9,6 +9,7 @@ class Patch {
     private:
         std::string filename;
         int tessellationLevel;
+        int numPatches;
 
         std::vector<glm::vec3> vertices;
 

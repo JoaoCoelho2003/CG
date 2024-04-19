@@ -1,77 +1,111 @@
 #include "../../include/Patch.h"
-#define _USE_MATH_DEFINES
-#include <math.h>
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <glm/glm.hpp>
 
+Patch::Patch(const std::string& filename, int tessLevel)
+    : filename(filename), tessellationLevel(tessLevel) {}
 
-Patch::Patch(const std::string& filename, int tessLevel) : filename(filename), tessellationLevel(tessLevel) {}
-
-int binomialCoefficient(int n, int k) {
-    if (k == 0 || k == n) {
-        return 1;
+float bernstein(int n, int i, float u) {
+    float coeff = 1.0f;
+    for (int j = 1; j <= i; ++j) {
+        coeff *= (float)(n - j + 1) / j;
     }
-    int result = 1;
-    for (int i = 1; i <= k; ++i) {
-        result *= (n - i + 1);
-        result /= i;
-    }
-    return result;
-}
-
-float bernstein(int n, int i, float t) {
-    return binomialCoefficient(n, i) * pow(t, i) * pow(1 - t, n - i);
+    return coeff * pow(u, i) * pow(1 - u, n - i);
 }
 
 void Patch::generateVertices() {
-    vertices.clear();
-
-    std::ifstream inputFile(filename);
-    if (!inputFile.is_open()) {
-        std::cerr << "Error opening input file." << std::endl;
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Error opening file: " << filename << std::endl;
         return;
     }
 
-    std::vector<glm::vec3> controlPoints;
-    std::string line;
-    while (std::getline(inputFile, line)) {
+    file >> numPatches;
+    file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::cout << "Number of Patches: " << numPatches << std::endl;
+    std::vector<std::vector<int>> patches(numPatches);
+    for (int i = 0; i < numPatches; ++i) {
+        std::string line;
+        std::getline(file, line);
         std::istringstream iss(line);
-        float x, y, z;
-        if (!(iss >> x >> y >> z)) {
-            break;
+        int index;
+        std::cout << "Patch " << i << ": ";
+        while (iss >> index) {
+            patches[i].push_back(index);
+            std::cout << index << " ";
+            if (iss.peek() == ',')
+                iss.ignore();
         }
-        controlPoints.push_back(glm::vec3(x, y, z));
+        std::cout << std::endl;
     }
 
-    inputFile.close();
+    int numControlPoints;
+    file >> numControlPoints;
+    file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::cout << "Number of Control Points: " << numControlPoints << std::endl;
+    
+    std::vector<glm::vec3> controlPoints(numControlPoints);
 
+    for (int i = 0; i < numControlPoints; ++i) {
+        std ::string line;
+        std::getline(file, line);
+        std::istringstream iss(line);
+        std::cout << "Control Point " << i << ": ";
+        iss >> controlPoints[i].x;
+        iss.ignore();
+        iss >> controlPoints[i].y;
+        iss.ignore();
+        iss >> controlPoints[i].z;
+        std::cout << controlPoints[i].x << " " << controlPoints[i].y << " " << controlPoints[i].z << std::endl;
+    }
+
+    file.close();
+
+    vertices.clear();
+
+    int n = 3;
     float step = 1.0f / tessellationLevel;
-    for (float u = 0.0f; u <= 1.0f; u += step) {
-        for (float v = 0.0f; v <= 1.0f; v += step) {
-            glm::vec3 point(0.0f, 0.0f, 0.0f);
-            for (size_t i = 0; i < controlPoints.size(); ++i) {
-                for (size_t j = 0; j < controlPoints.size(); ++j) {
-                    float bernsteinU = bernstein(controlPoints.size() - 1, i, u);
-                    float bernsteinV = bernstein(controlPoints.size() - 1, j, v);
-                    point += controlPoints[i] * bernsteinU * bernsteinV;
+
+    for (int p = 0; p < numPatches; ++p) {
+        for (float u = 0.0f; u <= 1.0f; u += step) {
+            for (float v = 0.0f; v <= 1.0f; v += step) {
+                glm::vec3 point(0.0f, 0.0f, 0.0f);
+                for (int i = 0; i <= n; ++i) {
+                    for (int j = 0; j <= n; ++j) {
+                        float bernsteinU = bernstein(n, i, u);
+                        float bernsteinV = bernstein(n, j, v);
+                        int idx = patches[p][i * (n + 1) + j];
+                        if (idx < controlPoints.size()) {
+                            point += controlPoints[idx] * bernsteinU * bernsteinV;
+                        }
+                    }
                 }
+                vertices.push_back(point);
             }
-            vertices.push_back(point);
         }
     }
 }
 
+
+
 void Patch::writeToFile(const std::string& filename) {
-    std::ofstream outputFile(filename);
-    if (!outputFile.is_open()) {
-        std::cerr << "Error opening output file." << std::endl;
+    std::ofstream outFile(filename);
+    if (!outFile.is_open()) {
+        std::cerr << "Error opening file: " << filename << std::endl;
         return;
     }
-    for (size_t i = 0; i < vertices.size(); ++i) {
-        outputFile << vertices[i].x << " " << vertices[i].y << " " << vertices[i].z << " " << std::endl;
+
+    for (int p = 0; p < numPatches; ++p) {
+        for (int i = 0; i < tessellationLevel; ++i) {
+            for (int j = 0; j < tessellationLevel; ++j) {
+                int index = i * tessellationLevel + j;
+                outFile << vertices[p * tessellationLevel * tessellationLevel + index].x << " "
+                        << vertices[p * tessellationLevel * tessellationLevel + index].y << " "
+                        << vertices[p * tessellationLevel * tessellationLevel + index].z << std::endl;
+            }
+        }
     }
 
-    outputFile.close();
+    outFile.close();
 }
