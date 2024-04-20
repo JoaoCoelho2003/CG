@@ -7,15 +7,15 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Add engine.cpp and generator.cpp as separate executables
 add_executable(engine src/engine.cpp)
-add_executable(generator src/generator.cpp src/Figures/Sphere.cpp src/Figures/Cone.cpp  src/Figures/Plane.cpp src/Figures/Box.cpp src/Figures/Torus.cpp)
+add_executable(generator src/generator.cpp src/Figures/Sphere.cpp src/Figures/Cone.cpp  src/Figures/Plane.cpp src/Figures/Box.cpp src/Figures/Torus.cpp src/Figures/Patch.cpp)
 
 # Add the -g flag to enable debugging symbols
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 
 find_package(OpenGL REQUIRED)
-include_directories(${OpenGL_INCLUDE_DIRS})
-link_directories(${OpenGL_LIBRARY_DIRS})
-add_definitions(${OpenGL_DEFINITIONS})
+include_directories(${OPENGL_INCLUDE_DIRS})
+link_directories(${OPENGL_LIBRARY_DIRS})
+add_definitions(${OPENGL_DEFINITIONS})
 
 if(NOT OPENGL_FOUND)
     message(FATAL_ERROR "OPENGL not found!")
@@ -49,7 +49,7 @@ else(WIN32) # Linux and Mac
 
     set(TOOLKITS_FOLDER "/usr/lib/x86_64-linux-gnu/")
     
-    target_link_libraries(engine ${OPENGL_LIBRARIES} ${TOOLKITS_FOLDER}/libglut.so tinyxml2)
+    target_link_libraries(engine ${OPENGL_LIBRARIES} ${TOOLKITS_FOLDER}/libglut.so tinyxml2 GLEW)
     target_link_libraries(generator ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
     
     if(NOT GLUT_FOUND)
