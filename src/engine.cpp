@@ -7,6 +7,9 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include "../include/World.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include "../include/CatmullRom.h"
 
 World world;
 
@@ -184,10 +187,21 @@ void parseTransform(const tinyxml2::XMLElement* transformElement, Node& node) {
         const char* type = child->Value();
         Transformation transform;
         if (strcmp(type, "translate") == 0) {
-            transform.type = TransformationType::TRANSLATE;
+            if (child->Attribute("time")) {
+                transform.type = TransformationType::CATMULL_ROM_TRANSLATE;
+                transform.values.push_back(child->FloatAttribute("time"));
+                transform.align = child->BoolAttribute("align");
+            } else {
+                transform.type = TransformationType::TRANSLATE;
+            }
         } else if (strcmp(type, "rotate") == 0) {
-            transform.type = TransformationType::ROTATE;
-            transform.values.push_back(child->FloatAttribute("angle"));
+            if (child->Attribute("angle")) {
+                transform.type = TransformationType::ROTATE;
+                transform.values.push_back(child->FloatAttribute("angle"));
+            } else {
+                transform.type = TransformationType::TIME_DEPENDENT_ROTATE;
+                transform.values.push_back(child->FloatAttribute("time"));
+            }
         } else if (strcmp(type, "scale") == 0) {
             transform.type = TransformationType::SCALE;
         }
@@ -195,9 +209,27 @@ void parseTransform(const tinyxml2::XMLElement* transformElement, Node& node) {
             std::cerr << "Error: Unknown transformation type: " << type << std::endl;
             continue;
         }
-        transform.values.push_back(child->FloatAttribute("x"));
-        transform.values.push_back(child->FloatAttribute("y"));
-        transform.values.push_back(child->FloatAttribute("z"));
+        if(transform.type != TransformationType::CATMULL_ROM_TRANSLATE && transform.type != TransformationType::TIME_DEPENDENT_ROTATE){
+            transform.values.push_back(child->FloatAttribute("x"));
+            transform.values.push_back(child->FloatAttribute("y"));
+            transform.values.push_back(child->FloatAttribute("z"));
+        }
+        else if(transform.type == TransformationType::CATMULL_ROM_TRANSLATE){
+            for(const tinyxml2::XMLElement* point = child->FirstChildElement(); point; point = point->NextSiblingElement()){
+                glm::vec3 controlPoint;
+                controlPoint.x = point->FloatAttribute("x");
+                controlPoint.y = point->FloatAttribute("y");
+                controlPoint.z = point->FloatAttribute("z");
+                transform.control_points.push_back(controlPoint);
+            }
+        }
+        else{
+            glm::vec3 controlPoint;
+            controlPoint.x = child->FloatAttribute("x");
+            controlPoint.y = child->FloatAttribute("y");
+            controlPoint.z = child->FloatAttribute("z");
+            transform.control_points.push_back(controlPoint);
+        }
         node.transformations.push_back(transform);
     }   
 }
@@ -277,7 +309,7 @@ void parseXML(const char* filename, World& tree) {
     }
 }
 
-void render_models(Tree tree, std::vector<Transformation> transformations = {}) {
+void render_models(Tree tree,std::vector<Transformation> transformations = {}) {
     for (auto& transform : tree.node.transformations) {
         transformations.push_back(transform);
     }
@@ -297,6 +329,52 @@ void render_models(Tree tree, std::vector<Transformation> transformations = {}) 
             case TransformationType::SCALE:
                 glScalef(transformation.values[0], transformation.values[1], transformation.values[2]);
                 break;
+
+            case TransformationType::TIME_DEPENDENT_ROTATE: {
+                float rotateTime = transformation.values[0];
+                float angle = (((float)glutGet(GLUT_ELAPSED_TIME) / 1000) * 360) / (float)(rotateTime);
+
+                glm::vec3 rotatePoint;
+                if (!transformation.control_points.empty()) {
+                    rotatePoint = transformation.control_points[0];
+                } else {
+                    rotatePoint = glm::vec3(0.0f, 0.0f, 0.0f);
+                }
+
+                glRotatef(angle, rotatePoint.x, rotatePoint.y, rotatePoint.z);
+                break;
+            }
+            
+            case TransformationType::CATMULL_ROM_TRANSLATE: {
+                int nControlPoints = transformation.control_points.size();
+                renderCatmullRomCurve(nControlPoints, transformation.control_points);
+
+                glm::vec3 pos, deriv;
+                float totalTime = transformation.values[0];
+                float elapsedTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+                float timeParameter = fmod(elapsedTime, totalTime) / totalTime;
+                getGlobalCatmullRomPoint(timeParameter, &pos, &deriv, nControlPoints, transformation.control_points);
+
+                glTranslatef(pos.x, pos.y, pos.z);
+
+                if (transformation.align) {
+                    float x[3] = {deriv.x, deriv.y, deriv.z};
+                    normalize(x);
+                    float y0[3] = {0, 1, 0};
+                    float z[3];
+                    cross(x, y0, z);
+                    normalize(z);
+                    float y[3];
+                    cross(z, x, y);
+                    normalize(y);
+
+                    float matrix[16];
+                    buildRotMatrix(x, y, z, matrix);
+
+                    glMultMatrixf(matrix);
+                }
+                break;
+            }
         }
     }
 
@@ -335,7 +413,7 @@ void render_models(Tree tree, std::vector<Transformation> transformations = {}) 
     glPopMatrix();
 
     for (auto& child : tree.children) {
-        render_models(child, transformations);
+        render_models(child,transformations);
     }
 }
 
@@ -361,6 +439,8 @@ void display() {
     render_models(world.tree);
 
     glutSwapBuffers();
+
+    glutPostRedisplay();
 }
 
 void resize(int w, int h) {
