@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
     }
     else if (figure == "patch") {
         std::string filename = argv[2];
-        int tessLevel = std::stoi(argv[3]);
+        double tessLevel = std::stod(argv[3]);
         std::string outputFilename = argv[4];
         Patch patch(filename, tessLevel);
         patch.generateVertices();

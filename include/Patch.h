@@ -10,11 +10,14 @@ class Patch {
         std::string filename;
         int tessellationLevel;
         int numPatches;
-
+        std::vector<std::vector<int>> patches;
+        std::vector<glm::vec3> controlPoints;
         std::vector<glm::vec3> vertices;
 
     public:
         Patch(const std::string& filename, int tessLevel);
+
+        void parseFile();
 
         void generateVertices();
 
