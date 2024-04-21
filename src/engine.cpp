@@ -204,6 +204,12 @@ void parseTransform(const tinyxml2::XMLElement* transformElement, Node& node) {
             }
         } else if (strcmp(type, "scale") == 0) {
             transform.type = TransformationType::SCALE;
+        } else if (strcmp(type, "color") == 0) {
+            transform.type = TransformationType::COLOR;
+            transform.values.push_back(child->FloatAttribute("r"));
+            transform.values.push_back(child->FloatAttribute("g"));
+            transform.values.push_back(child->FloatAttribute("b"));
+
         }
         else {
             std::cerr << "Error: Unknown transformation type: " << type << std::endl;
@@ -325,7 +331,7 @@ void render_models(Tree tree,std::vector<Transformation> transformations = {}) {
             case TransformationType::ROTATE:
                 glRotatef(transformation.values[0], transformation.values[1], transformation.values[2], transformation.values[3]);
                 break;
-
+            
             case TransformationType::SCALE:
                 glScalef(transformation.values[0], transformation.values[1], transformation.values[2]);
                 break;
@@ -375,6 +381,10 @@ void render_models(Tree tree,std::vector<Transformation> transformations = {}) {
                 }
                 break;
             }
+            case TransformationType::COLOR:
+
+                glColor3f(transformation.values[0],transformation.values[1],transformation.values[2]);
+                break;
         }
     }
 

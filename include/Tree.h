@@ -10,6 +10,7 @@ enum class TransformationType {
     TRANSLATE,
     ROTATE,
     SCALE,
+    COLOR,
     CATMULL_ROM_TRANSLATE,
     TIME_DEPENDENT_ROTATE
 };

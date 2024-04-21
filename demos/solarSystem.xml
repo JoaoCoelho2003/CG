@@ -10,6 +10,7 @@
     <group>
         <!-- Sun -->
         <transform>
+            <color r="1.0" g="0.7" b="0.0" />
             <translate x="0" y="0" z="0" />
             <scale x="1.0" y="1.0" z="1.0" />
         </transform>
@@ -20,13 +21,14 @@
         <!-- Asteroid -->
         <group>
             <transform>
+                <color r="1.0" g="1.0" b="1.0" />
                 <translate time="20" align="true">
                     <point x="50" y="0" z="0" />
                     <point x="20" y="0" z="-90" />
                     <point x="-50" y="0" z="0" />
                     <point x="-20" y="0" z="90" />
                 </translate>
-
+                <color r="0.0" g="0.0" b="1.0" />
                 <rotate time="20" x="0" y="1" z="0" />
                 <scale x="0.08" y="0.08" z="0.08" />
             </transform>
@@ -38,6 +40,7 @@
         <!-- Mercury -->
         <group>
             <transform>
+                <color r="1.0" g="1.0" b="1.0" />
                 <translate time="120" align="true">
                     <point x="70" y="0" z="0" />
                     <point x="49.497" y="0" z="-49.497" />
@@ -60,6 +63,7 @@
         <!-- Venus -->
         <group>
             <transform>
+                <color r="1.0" g="1.0" b="1.0" />
                 <translate time="120" align="true">
                     <point x="100" y="0" z="0" />
                     <point x="70" y="0" z="-70" />
@@ -82,6 +86,7 @@
         <!-- Earth -->
         <group>
             <transform>
+                <color r="1.0" g="1.0" b="1.0" />
                 <translate time="180" align="true">
                     <point x="140" y="0" z="0" />
                     <point x="100" y="0" z="-100" />
@@ -123,6 +128,7 @@
         <!-- Mars -->
         <group>
             <transform>
+                <color r="1.0" g="1.0" b="1.0" />
                 <translate time="220" align="true">
                     <point x="180" y="0" z="0" />
                     <point x="127.279" y="0" z="-127.279" />
@@ -178,6 +184,7 @@
         <!-- Jupiter -->
         <group>
             <transform>
+                <color r="1.0" g="1.0" b="1.0" />
                 <translate time="280" align="true">
                     <point x="240" y="0" z="0" />
                     <point x="169.705" y="0" z="-169.705" />
@@ -233,6 +240,7 @@
         <!-- Saturn -->
         <group>
             <transform>
+                <color r="1.0" g="1.0" b="1.0" />
                 <translate time="320" align="true">
                     <point x="340" y="0" z="0" />
                     <point x="240.445" y="0" z="-240.445" />
@@ -273,6 +281,7 @@
         <!-- Uranus -->
         <group>
             <transform>
+                <color r="1.0" g="1.0" b="1.0" />
                 <translate time="400" align="true">
                     <point x="500" y="0" z="0" />
                     <point x="353.553" y="0" z="-353.553" />
@@ -312,6 +321,7 @@
         <!-- Neptune -->
         <group>
             <transform>
+                <color r="1.0" g="1.0" b="1.0" />
                 <translate time="440" align="true">
                     <point x="640" y="0" z="0" />
                     <point x="453.553" y="0" z="-453.553" />
