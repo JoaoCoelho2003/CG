@@ -30,10 +30,10 @@
                 </translate>
                 <color r="0.0" g="0.0" b="1.0" />
                 <rotate time="20" x="0" y="1" z="0" />
-                <scale x="0.08" y="0.08" z="0.08" />
+                <scale x="0.8" y="0.8" z="0.8" />
             </transform>
             <models>
-                <model file="templateSphere.3d" />
+                <model file="bezier_10.3d" /> <!-- generator patch teapot.patch 10 bezier_10.3d -->
             </models>
         </group>
 
@@ -41,7 +41,7 @@
         <group>
             <transform>
                 <color r="1.0" g="1.0" b="1.0" />
-                <translate time="120" align="true">
+                <translate time="20" align="true">
                     <point x="70" y="0" z="0" />
                     <point x="49.497" y="0" z="-49.497" />
                     <point x="0" y="0" z="-70" />
@@ -64,7 +64,7 @@
         <group>
             <transform>
                 <color r="1.0" g="1.0" b="1.0" />
-                <translate time="120" align="true">
+                <translate time="30" align="true">
                     <point x="100" y="0" z="0" />
                     <point x="70" y="0" z="-70" />
                     <point x="0" y="0" z="-100" />
@@ -87,7 +87,7 @@
         <group>
             <transform>
                 <color r="1.0" g="1.0" b="1.0" />
-                <translate time="180" align="true">
+                <translate time="50" align="true">
                     <point x="140" y="0" z="0" />
                     <point x="100" y="0" z="-100" />
                     <point x="0" y="0" z="-140" />
@@ -129,7 +129,7 @@
         <group>
             <transform>
                 <color r="1.0" g="1.0" b="1.0" />
-                <translate time="220" align="true">
+                <translate time="70" align="true">
                     <point x="180" y="0" z="0" />
                     <point x="127.279" y="0" z="-127.279" />
                     <point x="0" y="0" z="-180" />
@@ -185,7 +185,7 @@
         <group>
             <transform>
                 <color r="1.0" g="1.0" b="1.0" />
-                <translate time="280" align="true">
+                <translate time="80" align="true">
                     <point x="240" y="0" z="0" />
                     <point x="169.705" y="0" z="-169.705" />
                     <point x="0" y="0" z="-240" />
@@ -241,7 +241,7 @@
         <group>
             <transform>
                 <color r="1.0" g="1.0" b="1.0" />
-                <translate time="320" align="true">
+                <translate time="100" align="true">
                     <point x="340" y="0" z="0" />
                     <point x="240.445" y="0" z="-240.445" />
                     <point x="0" y="0" z="-340" />
@@ -282,7 +282,7 @@
         <group>
             <transform>
                 <color r="1.0" g="1.0" b="1.0" />
-                <translate time="400" align="true">
+                <translate time="120" align="true">
                     <point x="500" y="0" z="0" />
                     <point x="353.553" y="0" z="-353.553" />
                     <point x="0" y="0" z="-500" />
@@ -322,7 +322,7 @@
         <group>
             <transform>
                 <color r="1.0" g="1.0" b="1.0" />
-                <translate time="440" align="true">
+                <translate time="140" align="true">
                     <point x="640" y="0" z="0" />
                     <point x="453.553" y="0" z="-453.553" />
                     <point x="0" y="0" z="-640" />

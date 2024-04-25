@@ -8,14 +8,6 @@
 Patch::Patch(const std::string& filename, int tessLevel)
     : filename(filename), tessellationLevel(tessLevel) {}
 
-float bernstein(int n, int i, float u) {
-    float coeff = 1.0f;
-    for (int j = 1; j <= i; ++j) {
-        coeff *= (float)(n - j + 1) / j;
-    }
-    return coeff * pow(u, i) * pow(1 - u, n - i);
-}
-
 glm::vec3 evalBezierCurve(const std::vector<glm::vec3>& P, const float &t) {
     float b0 = (1 - t) * (1 - t) * (1 - t);
     float b1 = 3 * t * (1 - t) * (1 - t);
