@@ -22,6 +22,7 @@ float scaleHeight = 1.0f;
 float movementSpeed = 0.1f;
 bool cursorVisible = true;
 bool showReferenceAxes = true;
+bool showCatmullRom = true;
 
 void referencial() {
     glBegin(GL_LINES);
@@ -177,6 +178,9 @@ void keyboard_special(int key, int x, int y) {
             break;
         case GLUT_KEY_F1:
             showReferenceAxes = !showReferenceAxes;
+            break;
+        case GLUT_KEY_F2:
+            showCatmullRom = !showCatmullRom;
             break;
     }
     glutPostRedisplay();
@@ -353,7 +357,9 @@ void render_models(Tree tree,std::vector<Transformation> transformations = {}) {
             
             case TransformationType::CATMULL_ROM_TRANSLATE: {
                 int nControlPoints = transformation.control_points.size();
-                renderCatmullRomCurve(nControlPoints, transformation.control_points);
+                if (showCatmullRom) {
+                    renderCatmullRomCurve(nControlPoints, transformation.control_points);
+                }
 
                 glm::vec3 pos, deriv;
                 float totalTime = transformation.values[0];
