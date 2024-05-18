@@ -7,7 +7,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Add engine.cpp and generator.cpp as separate executables
 add_executable(engine src/engine.cpp src/CatmullRom.cpp)
-add_executable(generator src/generator.cpp src/Figures/Sphere.cpp src/Figures/Cone.cpp  src/Figures/Plane.cpp src/Figures/Box.cpp src/Figures/Torus.cpp src/Figures/Patch.cpp)
+add_executable(generator src/generator.cpp src/Figures/Sphere.cpp src/Figures/Cone.cpp src/Figures/Plane.cpp src/Figures/Box.cpp src/Figures/Torus.cpp src/Figures/Patch.cpp)
 
 # Add the -g flag to enable debugging symbols
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
@@ -61,11 +61,12 @@ endif(WIN32) # End of WIN32 check
 # Set the output directory for executables
 set_target_properties(engine generator
     PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin"
+    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 )
 
 # Add a custom target for cleaning the build
 add_custom_target(clean-all
     COMMAND ${CMAKE_BUILD_TOOL} clean
-    COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_SOURCE_DIR}/engine ${CMAKE_SOURCE_DIR}/generator
+    COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_SOURCE_DIR}/bin/engine ${CMAKE_SOURCE_DIR}/bin/generator
 )

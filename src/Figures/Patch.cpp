@@ -33,27 +33,22 @@ void Patch::parseFile() {
 
     file >> numPatches;
     file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    std::cout << "Number of Patches: " << numPatches << std::endl;
     patches.resize(numPatches);
     for (int i = 0; i < numPatches; ++i) {
         std::string line;
         std::getline(file, line);
         std::istringstream iss(line);
         int index;
-        std::cout << "Patch " << i << ": ";
         while (iss >> index) {
             patches[i].push_back(index);
-            std::cout << index << " ";
             if (iss.peek() == ',')
                 iss.ignore();
         }
-        std::cout << std::endl;
     }
 
     int numControlPoints;
     file >> numControlPoints;
     file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    std::cout << "Number of Control Points: " << numControlPoints << std::endl;
     
     controlPoints.resize(numControlPoints);
 
@@ -61,13 +56,11 @@ void Patch::parseFile() {
         std ::string line;
         std::getline(file, line);
         std::istringstream iss(line);
-        std::cout << "Control Point " << i << ": ";
         iss >> controlPoints[i].x;
         iss.ignore();
         iss >> controlPoints[i].y;
         iss.ignore();
         iss >> controlPoints[i].z;
-        std::cout << controlPoints[i].x << " " << controlPoints[i].y << " " << controlPoints[i].z << std::endl;
     }
 
     file.close();

@@ -15,7 +15,8 @@ int main(int argc, char* argv[]) {
         std::string outputFilename = argv[5];
         Sphere sphere(radius, slices, stacks);
         sphere.generateVertices();
-        sphere.writeToFile(outputFilename);
+        std::string completePath = "./models/" + outputFilename;
+        sphere.writeToFile(completePath);
     }
     else if (figure == "cone") {
         float radius = std::stof(argv[2]);
@@ -25,7 +26,8 @@ int main(int argc, char* argv[]) {
         std::string outputFilename = argv[6];
         Cone cone(height, radius, slices, stacks);
         cone.generateVertices();
-        cone.writeToFile(outputFilename);
+        std::string completePath = "./models/" + outputFilename;
+        cone.writeToFile(completePath);
     }    
     else if (figure == "plane") {
         float length = std::stof(argv[2]);
@@ -33,7 +35,8 @@ int main(int argc, char* argv[]) {
         std::string outputFilename = argv[4];
         Plane plane(length, divisions);
         plane.generateVertices();
-        plane.writeToFile(outputFilename);
+        std::string completePath = "./models/" + outputFilename;
+        plane.writeToFile(completePath);
     }
     else if (figure == "box") {
         float dimension = std::stof(argv[2]);
@@ -41,7 +44,8 @@ int main(int argc, char* argv[]) {
         std::string outputFilename = argv[4];
         Box box(dimension, divisions);
         box.generateVertices();
-        box.writeToFile(outputFilename);
+        std::string completePath = "./models/" + outputFilename;
+        box.writeToFile(completePath);
     }
     else if (figure == "torus") {
         float radius = std::stof(argv[2]);
@@ -51,15 +55,18 @@ int main(int argc, char* argv[]) {
         std::string outputFilename = argv[6];
         Torus torus(radius, tube_radius, slices, stacks);
         torus.generateVertices();
-        torus.writeToFile(outputFilename);
+        std::string completePath = "./models/" + outputFilename;
+        torus.writeToFile(completePath);
     }
     else if (figure == "patch") {
         std::string filename = argv[2];
         double tessLevel = std::stod(argv[3]);
         std::string outputFilename = argv[4];
-        Patch patch(filename, tessLevel);
+        std::string completeFilename = "./models/" + filename;
+        Patch patch(completeFilename, tessLevel);
         patch.generateVertices();
-        patch.writeToFile(outputFilename);
+        std::string completePath = "./models/" + outputFilename;
+        patch.writeToFile(completePath);
         }
     else {
         std::cerr << "Invalid figure: " << figure << std::endl;

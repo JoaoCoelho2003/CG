@@ -248,7 +248,8 @@ void parseModel(const tinyxml2::XMLElement* modelElement, Node& node) {
     for(const tinyxml2::XMLElement* child = modelElement->FirstChildElement(); child; child = child->NextSiblingElement()) {   
         const char* filename = child->Attribute("file");
         if (filename) {
-            node.model_name.push_back(filename);
+            std::string fullpath = std::string("./models/") + filename;
+            node.model_name.push_back(fullpath);
         }
     }
 }
