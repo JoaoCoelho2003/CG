@@ -6,11 +6,11 @@
 #include <math.h>
 #include <GL/glew.h>
 #include <GL/glut.h>
-#include <IL/il.h>
 #include "../include/World.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "../include/CatmullRom.h"
+#include <IL/il.h>
 
 World world;
 
@@ -209,14 +209,7 @@ void parseTransform(const tinyxml2::XMLElement* transformElement, Node& node) {
             }
         } else if (strcmp(type, "scale") == 0) {
             transform.type = TransformationType::SCALE;
-        } else if (strcmp(type, "color") == 0) {
-            transform.type = TransformationType::COLOR;
-            transform.values.push_back(child->FloatAttribute("r"));
-            transform.values.push_back(child->FloatAttribute("g"));
-            transform.values.push_back(child->FloatAttribute("b"));
-
-        }
-        else {
+        } else {
             std::cerr << "Error: Unknown transformation type: " << type << std::endl;
             continue;
         }
@@ -245,12 +238,76 @@ void parseTransform(const tinyxml2::XMLElement* transformElement, Node& node) {
     }   
 }
 
+void parseColor(const tinyxml2::XMLElement* colorElement, Material& material) {
+    const tinyxml2::XMLElement* diffuse = colorElement->FirstChildElement("diffuse");
+    if (diffuse) {
+        material.diffuse[0] = diffuse->FloatAttribute("R") / 255.0f;
+        material.diffuse[1] = diffuse->FloatAttribute("G") / 255.0f;
+        material.diffuse[2] = diffuse->FloatAttribute("B") / 255.0f;
+    }
+
+    const tinyxml2::XMLElement* ambient = colorElement->FirstChildElement("ambient");
+    if (ambient) {
+        material.ambient[0] = ambient->FloatAttribute("R") / 255.0f;
+        material.ambient[1] = ambient->FloatAttribute("G") / 255.0f;
+        material.ambient[2] = ambient->FloatAttribute("B") / 255.0f;
+    }
+
+    const tinyxml2::XMLElement* specular = colorElement->FirstChildElement("specular");
+    if (specular) {
+        material.specular[0] = specular->FloatAttribute("R") / 255.0f;
+        material.specular[1] = specular->FloatAttribute("G") / 255.0f;
+        material.specular[2] = specular->FloatAttribute("B") / 255.0f;
+    }
+
+    const tinyxml2::XMLElement* emissive = colorElement->FirstChildElement("emissive");
+    if (emissive) {
+        material.emissive[0] = emissive->FloatAttribute("R") / 255.0f;
+        material.emissive[1] = emissive->FloatAttribute("G") / 255.0f;
+        material.emissive[2] = emissive->FloatAttribute("B") / 255.0f;
+    }
+
+    const tinyxml2::XMLElement* shininess = colorElement->FirstChildElement("shininess");
+    if (shininess) {
+        material.shininess = shininess->FloatAttribute("value");
+    }
+}
+
+void parseTexture(const tinyxml2::XMLElement* textureElement, Model& model) {
+    const char* file = textureElement->Attribute("file");
+    if (file) {
+        std::string filepath = std::string("./textures/") + file;
+        ILuint imageID;
+        ilGenImages(1, &imageID);
+        ilBindImage(imageID);
+        if (ilLoadImage(filepath.c_str())) {
+            ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+            glGenTextures(1, &model.textureID);
+            glBindTexture(GL_TEXTURE_2D, model.textureID);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT), 0, GL_RGBA, GL_UNSIGNED_BYTE, ilGetData());
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        }
+        ilDeleteImages(1, &imageID);
+    }
+}
+
 void parseModel(const tinyxml2::XMLElement* modelElement, Node& node) {
-    for(const tinyxml2::XMLElement* child = modelElement->FirstChildElement(); child; child = child->NextSiblingElement()) {   
+    for (const tinyxml2::XMLElement* child = modelElement->FirstChildElement(); child; child = child->NextSiblingElement()) {
         const char* filename = child->Attribute("file");
         if (filename) {
             std::string fullpath = std::string("./models/") + filename;
             node.model_name.push_back(fullpath);
+            Model model;
+            if (child->FirstChildElement("texture")) {
+                parseTexture(child->FirstChildElement("texture"), model);
+            }
+
+            if (child->FirstChildElement("color")) {
+                parseColor(child->FirstChildElement("color"), model.material);
+            }
+
+            world.models[fullpath] = model;
         }
     }
 }
@@ -269,6 +326,43 @@ void parseGroup(const tinyxml2::XMLElement* groupElement, Tree& tree) {
         } else {
             std::cerr << "Error: Unknown element type: " << type << std::endl;
         }
+    }
+}
+
+void parseLight(const tinyxml2::XMLElement* lightElement, Light& light) {
+    const char* type = lightElement->Attribute("type");
+    if (strcmp(type, "point") == 0) {
+        light.position[3] = 1.0f;
+    } else if (strcmp(type, "directional") == 0) {
+        light.position[3] = 0.0f;
+    }
+
+    light.position[0] = lightElement->FloatAttribute("posX");
+    light.position[1] = lightElement->FloatAttribute("posY");
+    light.position[2] = lightElement->FloatAttribute("posZ");
+
+    const tinyxml2::XMLElement* ambient = lightElement->FirstChildElement("ambient");
+    if (ambient) {
+        light.ambient[0] = ambient->FloatAttribute("R") / 255.0f;
+        light.ambient[1] = ambient->FloatAttribute("G") / 255.0f;
+        light.ambient[2] = ambient->FloatAttribute("B") / 255.0f;
+        light.ambient[3] = 1.0f;
+    }
+
+    const tinyxml2::XMLElement* diffuse = lightElement->FirstChildElement("diffuse");
+    if (diffuse) {
+        light.diffuse[0] = diffuse->FloatAttribute("R") / 255.0f;
+        light.diffuse[1] = diffuse->FloatAttribute("G") / 255.0f;
+        light.diffuse[2] = diffuse->FloatAttribute("B") / 255.0f;
+        light.diffuse[3] = 1.0f;
+    }
+
+    const tinyxml2::XMLElement* specular = lightElement->FirstChildElement("specular");
+    if (specular) {
+        light.specular[0] = specular->FloatAttribute("R") / 255.0f;
+        light.specular[1] = specular->FloatAttribute("G") / 255.0f;
+        light.specular[2] = specular->FloatAttribute("B") / 255.0f;
+        light.specular[3] = 1.0f;
     }
 }
 
@@ -313,6 +407,15 @@ void parseXML(const char* filename, World& tree) {
         };
     } else {
         std::cerr << "Error: Missing <window> element in XML file." << std::endl;
+    }
+
+    tinyxml2::XMLElement* lights = root->FirstChildElement("lights");
+    if (lights) {
+        for (tinyxml2::XMLElement* light = lights->FirstChildElement("light"); light; light = light->NextSiblingElement("light")) {
+            Light newLight;
+            parseLight(light, newLight);
+            world.lights.push_back(newLight);
+        }
     }
 
     tinyxml2::XMLElement* groupElement = root->FirstChildElement("group");
@@ -389,10 +492,6 @@ void render_models(Tree tree,std::vector<Transformation> transformations = {}) {
                 }
                 break;
             }
-            case TransformationType::COLOR:
-
-                glColor3f(transformation.values[0],transformation.values[1],transformation.values[2]);
-                break;
         }
     }
 
@@ -444,6 +543,15 @@ void display() {
               world.camera.lookAtX, world.camera.lookAtY, world.camera.lookAtZ,
               world.camera.upX, world.camera.upY, world.camera.upZ);
 
+    // Setup lighting
+    for (size_t i = 0; i < world.lights.size(); ++i) {
+        glEnable(GL_LIGHT0 + i);
+        glLightfv(GL_LIGHT0 + i, GL_POSITION, world.lights[i].position);
+        glLightfv(GL_LIGHT0 + i, GL_AMBIENT, world.lights[i].ambient);
+        glLightfv(GL_LIGHT0 + i, GL_DIFFUSE, world.lights[i].diffuse);
+        glLightfv(GL_LIGHT0 + i, GL_SPECULAR, world.lights[i].specular);
+    }
+
     // Apply global transformations
     glRotatef(rotateAngle_lr, 0.0f, 1.0f, 0.0f);
     glRotatef(rotateAngle_ud, 0.0f, 0.0f, 1.0f);
@@ -454,7 +562,16 @@ void display() {
     }
     glColor3f(1.0f, 1.0f, 1.0f);
 
+    // Draw models with materials
     render_models(world.tree);
+
+    // Draw light sources
+    for (size_t i = 0; i < world.lights.size(); ++i) {
+        glPushMatrix();
+        glTranslatef(world.lights[i].position[0], world.lights[i].position[1], world.lights[i].position[2]);
+        glColor3f(world.lights[i].diffuse[0], world.lights[i].diffuse[1], world.lights[i].diffuse[2]);
+        glPopMatrix();
+    }
 
     glutSwapBuffers();
 
@@ -526,12 +643,9 @@ int main(int argc, char* argv[]) {
     glutInitWindowSize(800, 800);
     glutCreateWindow("Engine");
 
-    GLenum err = glewInit();
-    if (err != GLEW_OK) {
-        fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
-    }
+    glewInit();
+    ilInit();
     
-
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
