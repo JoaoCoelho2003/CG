@@ -431,7 +431,7 @@ void parseXML(const char* filename, World& tree) {
     }
 }
 
-void render_models(Tree tree,std::vector<Transformation> transformations = {}) {
+void render_models(Tree tree, std::vector<Transformation> transformations = {}) {
     for (auto& transform : tree.node.transformations) {
         transformations.push_back(transform);
     }
@@ -527,11 +527,11 @@ void render_models(Tree tree,std::vector<Transformation> transformations = {}) {
         }
 
         // Set material properties
-        glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, model.material.diffuse);
-        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, model.material.ambient);
-        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, model.material.specular);
-        glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, model.material.emissive);
-        glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, model.material.shininess);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, model.material.diffuse);
+        glMaterialfv(GL_FRONT, GL_AMBIENT, model.material.ambient);
+        glMaterialfv(GL_FRONT, GL_SPECULAR, model.material.specular);
+        glMaterialfv(GL_FRONT, GL_EMISSION, model.material.emissive);
+        glMaterialf(GL_FRONT, GL_SHININESS, model.material.shininess);
 
         glBindBuffer(GL_ARRAY_BUFFER, model.vbo);
         glEnableClientState(GL_VERTEX_ARRAY);
@@ -544,7 +544,7 @@ void render_models(Tree tree,std::vector<Transformation> transformations = {}) {
     glPopMatrix();
 
     for (auto& child : tree.children) {
-        render_models(child,transformations);
+        render_models(child, transformations);
     }
 }
 
@@ -673,6 +673,8 @@ int main(int argc, char* argv[]) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
+    glEnable(GL_LIGHTING); // Enable lighting
+    glEnable(GL_LIGHT0); // Enable default light
 
     world.camera = {0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 60.0f, 1.0f, 1000.0f};
     world.window = {800, 800};
