@@ -19,10 +19,10 @@ struct Triangle {
 };
 
 struct Material {
-    float diffuse[3] = {200.0f / 255.0f, 200.0f / 255.0f, 200.0f / 255.0f};
-    float ambient[3] = {50.0f / 255.0f, 50.0f / 255.0f, 50.0f / 255.0f};
-    float specular[3] = {0.0f, 0.0f, 0.0f};
-    float emissive[3] = {0.0f, 0.0f, 0.0f};
+    float diffuse[4] = {200.0f / 255.0f, 200.0f / 255.0f, 200.0f / 255.0f,1.0f};
+    float ambient[4] = {50.0f / 255.0f, 50.0f / 255.0f, 50.0f / 255.0f ,1.0f};
+    float specular[4] = {0.0f, 0.0f, 0.0f,1.0f};
+    float emissive[4] = {0.0f, 0.0f, 0.0f,1.0f};
     float shininess = 0.0f;
 };
 
@@ -35,10 +35,8 @@ struct Model {
 };
 
 struct Light {
-    float position[4];
-    float ambient[4];
-    float diffuse[4];
-    float specular[4];
+    char type;
+    float *params;
 };
 
 struct Camera {

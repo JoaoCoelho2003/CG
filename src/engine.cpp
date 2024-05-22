@@ -331,39 +331,46 @@ void parseGroup(const tinyxml2::XMLElement* groupElement, Tree& tree) {
 
 void parseLight(const tinyxml2::XMLElement* lightElement, Light& light) {
     const char* type = lightElement->Attribute("type");
+
     if (strcmp(type, "point") == 0) {
-        light.position[3] = 1.0f;
+        light.type = 'P';
     } else if (strcmp(type, "directional") == 0) {
-        light.position[3] = 0.0f;
+        light.type = 'D';
+    } else if (strcmp(type, "spotlight") == 0) {
+        light.type = 'S';
+    } else {
+        std::cerr << "Error: Unknown light type: " << type << std::endl;
+        return;
     }
 
-    light.position[0] = lightElement->FloatAttribute("posX");
-    light.position[1] = lightElement->FloatAttribute("posY");
-    light.position[2] = lightElement->FloatAttribute("posZ");
-
-    const tinyxml2::XMLElement* ambient = lightElement->FirstChildElement("ambient");
-    if (ambient) {
-        light.ambient[0] = ambient->FloatAttribute("R") / 255.0f;
-        light.ambient[1] = ambient->FloatAttribute("G") / 255.0f;
-        light.ambient[2] = ambient->FloatAttribute("B") / 255.0f;
-        light.ambient[3] = 1.0f;
+    switch (light.type)
+    {
+    case 'P':
+        light.params = new float[3];
+        light.params[0] = lightElement->FloatAttribute("posX");
+        light.params[1] = lightElement->FloatAttribute("posY");
+        light.params[2] = lightElement->FloatAttribute("posZ");
+        break;
+    case 'D':
+        light.params = new float[3];
+        light.params[0] = lightElement->FloatAttribute("dirX");
+        light.params[1] = lightElement->FloatAttribute("dirY");
+        light.params[2] = lightElement->FloatAttribute("dirZ");
+        break;
+    case 'S':
+        light.params = new float[7];
+        light.params[0] = lightElement->FloatAttribute("posX");
+        light.params[1] = lightElement->FloatAttribute("posY");
+        light.params[2] = lightElement->FloatAttribute("posZ");
+        light.params[3] = lightElement->FloatAttribute("dirX");
+        light.params[4] = lightElement->FloatAttribute("dirY");
+        light.params[5] = lightElement->FloatAttribute("dirZ");
+        light.params[6] = lightElement->FloatAttribute("cutoff");
+        break;
+    default:
+        break;
     }
 
-    const tinyxml2::XMLElement* diffuse = lightElement->FirstChildElement("diffuse");
-    if (diffuse) {
-        light.diffuse[0] = diffuse->FloatAttribute("R") / 255.0f;
-        light.diffuse[1] = diffuse->FloatAttribute("G") / 255.0f;
-        light.diffuse[2] = diffuse->FloatAttribute("B") / 255.0f;
-        light.diffuse[3] = 1.0f;
-    }
-
-    const tinyxml2::XMLElement* specular = lightElement->FirstChildElement("specular");
-    if (specular) {
-        light.specular[0] = specular->FloatAttribute("R") / 255.0f;
-        light.specular[1] = specular->FloatAttribute("G") / 255.0f;
-        light.specular[2] = specular->FloatAttribute("B") / 255.0f;
-        light.specular[3] = 1.0f;
-    }
 }
 
 void parseXML(const char* filename, World& tree) {
@@ -519,6 +526,13 @@ void render_models(Tree tree,std::vector<Transformation> transformations = {}) {
             model.triangles.resize(vertices.size() / 3);
         }
 
+        // Set material properties
+        glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, model.material.diffuse);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, model.material.ambient);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, model.material.specular);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, model.material.emissive);
+        glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, model.material.shininess);
+
         glBindBuffer(GL_ARRAY_BUFFER, model.vbo);
         glEnableClientState(GL_VERTEX_ARRAY);
         glVertexPointer(3, GL_FLOAT, sizeof(Vertex), nullptr);
@@ -545,11 +559,28 @@ void display() {
 
     // Setup lighting
     for (size_t i = 0; i < world.lights.size(); ++i) {
-        glEnable(GL_LIGHT0 + i);
-        glLightfv(GL_LIGHT0 + i, GL_POSITION, world.lights[i].position);
-        glLightfv(GL_LIGHT0 + i, GL_AMBIENT, world.lights[i].ambient);
-        glLightfv(GL_LIGHT0 + i, GL_DIFFUSE, world.lights[i].diffuse);
-        glLightfv(GL_LIGHT0 + i, GL_SPECULAR, world.lights[i].specular);
+        GLenum lightID = GL_LIGHT0 + i;
+        glEnable(lightID);
+
+        switch (world.lights[i].type) {
+            case 'P': // Point light
+                glLightfv(lightID, GL_POSITION, world.lights[i].params);
+                break;
+            case 'D': { // Directional light
+                GLfloat position[] = { world.lights[i].params[0], world.lights[i].params[1], world.lights[i].params[2], 0.0f };
+                glLightfv(lightID, GL_POSITION, position);
+                break;
+            }
+            case 'S': { // Spotlight
+                glLightfv(lightID, GL_POSITION, world.lights[i].params);
+                glLightfv(lightID, GL_SPOT_DIRECTION, world.lights[i].params + 3);
+                glLightf(lightID, GL_SPOT_CUTOFF, world.lights[i].params[6]);
+                glLightf(lightID, GL_SPOT_EXPONENT, 2.0f);
+                break;
+            }
+            default:
+                break;
+        }
     }
 
     // Apply global transformations
@@ -564,14 +595,6 @@ void display() {
 
     // Draw models with materials
     render_models(world.tree);
-
-    // Draw light sources
-    for (size_t i = 0; i < world.lights.size(); ++i) {
-        glPushMatrix();
-        glTranslatef(world.lights[i].position[0], world.lights[i].position[1], world.lights[i].position[2]);
-        glColor3f(world.lights[i].diffuse[0], world.lights[i].diffuse[1], world.lights[i].diffuse[2]);
-        glPopMatrix();
-    }
 
     glutSwapBuffers();
 
@@ -645,7 +668,8 @@ int main(int argc, char* argv[]) {
 
     glewInit();
     ilInit();
-    
+
+    glEnable(GL_RESCALE_NORMAL);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
