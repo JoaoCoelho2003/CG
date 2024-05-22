@@ -5,58 +5,72 @@ project(class2)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+# Add the -g flag to enable debugging symbols
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+
 # Add engine.cpp and generator.cpp as separate executables
 add_executable(engine src/engine.cpp src/CatmullRom.cpp)
 add_executable(generator src/generator.cpp src/Figures/Sphere.cpp src/Figures/Cone.cpp src/Figures/Plane.cpp src/Figures/Box.cpp src/Figures/Torus.cpp src/Figures/Patch.cpp)
 
-# Add the -g flag to enable debugging symbols
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+# Find and include DevIL
+find_package(DevIL REQUIRED)
+if (DevIL_FOUND)
+    include_directories(${DevIL_INCLUDE_DIR})
+    target_link_libraries(engine ${DevIL_LIBRARIES})
+    target_link_libraries(generator ${DevIL_LIBRARIES})
+endif()
 
+# Find and include OpenGL
 find_package(OpenGL REQUIRED)
-include_directories(${OPENGL_INCLUDE_DIRS})
-link_directories(${OPENGL_LIBRARY_DIRS})
-add_definitions(${OPENGL_DEFINITIONS})
-
-if(NOT OPENGL_FOUND)
+if (OPENGL_FOUND)
+    include_directories(${OPENGL_INCLUDE_DIRS})
+    link_directories(${OPENGL_LIBRARY_DIRS})
+    add_definitions(${OPENGL_DEFINITIONS})
+else()
     message(FATAL_ERROR "OPENGL not found!")
-endif(NOT OPENGL_FOUND)
+endif()
 
-if(WIN32)
+# Platform-specific configurations
+if (WIN32)
     message(STATUS "Toolkits_DIR set to: " ${TOOLKITS_FOLDER})
     set(TOOLKITS_FOLDER "" CACHE PATH "Path to Toolkits folder")
-    
-    if(NOT EXISTS "${TOOLKITS_FOLDER}/glut/GL/glut.h" OR NOT EXISTS "${TOOLKITS_FOLDER}/glut/glut32.lib")
+
+    if (NOT EXISTS "${TOOLKITS_FOLDER}/glut/GL/glut.h" OR NOT EXISTS "${TOOLKITS_FOLDER}/glut/glut32.lib")
         message(FATAL_ERROR "GLUT not found")
-    endif(NOT EXISTS "${TOOLKITS_FOLDER}/glut/GL/glut.h" OR NOT EXISTS "${TOOLKITS_FOLDER}/glut/glut32.lib")    
-    
+    endif()
+
     include_directories(${TOOLKITS_FOLDER}/glut)
     target_link_libraries(engine ${OPENGL_LIBRARIES} ${TOOLKITS_FOLDER}/glut/glut32.lib)
     target_link_libraries(generator ${OPENGL_LIBRARIES} ${TOOLKITS_FOLDER}/glut/glut32.lib)
-    
-    if(EXISTS "${TOOLKITS_FOLDER}/glut/glut32.dll")
-        file(COPY ${TOOLKITS_FOLDER}/glut/glut32.dll DESTINATION ${CMAKE_BINARY_DIR})
-    endif(EXISTS "${TOOLKITS_FOLDER}/glut/glut32.dll")    
-    
-    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT engine)
-    
-else(WIN32) # Linux and Mac
 
+    if (EXISTS "${TOOLKITS_FOLDER}/glut/glut32.dll")
+        file(COPY ${TOOLKITS_FOLDER}/glut/glut32.dll DESTINATION ${CMAKE_BINARY_DIR})
+    endif()
+
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT engine)
+else() # Linux and Mac
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated")
     find_package(GLUT REQUIRED)
-    include_directories(${GLUT_INCLUDE_DIR})
-    link_directories(${GLUT_LIBRARY_DIRS})
-    add_definitions(${GLUT_DEFINITIONS})
+
+    if (GLUT_FOUND)
+        include_directories(${GLUT_INCLUDE_DIR})
+        link_directories(${GLUT_LIBRARY_DIRS})
+        add_definitions(${GLUT_DEFINITIONS})
+    else()
+        message(FATAL_ERROR "GLUT not found!")
+    endif()
 
     set(TOOLKITS_FOLDER "/usr/lib/x86_64-linux-gnu/")
-    
-    target_link_libraries(engine ${OPENGL_LIBRARIES} ${TOOLKITS_FOLDER}/libglut.so tinyxml2 GLEW)
+
+    target_link_libraries(engine ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} tinyxml2 GLEW)
     target_link_libraries(generator ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
-    
-    if(NOT GLUT_FOUND)
-       message(FATAL_ERROR "GLUT not found!")
-    endif(NOT GLUT_FOUND)
-    
-endif(WIN32) # End of WIN32 check
+endif()
+
+# Ensure DevIL libraries are linked
+if (DevIL_FOUND)
+    target_link_libraries(engine IL ILU ILUT)
+    target_link_libraries(generator IL ILU ILUT)
+endif()
 
 # Set the output directory for executables
 set_target_properties(engine generator
