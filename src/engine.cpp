@@ -10,7 +10,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "../include/CatmullRom.h"
-#include <IL/il.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include "../include/stb_image.h"
 
 World world;
 
@@ -278,26 +279,36 @@ void parseColor(const tinyxml2::XMLElement* colorElement, Material& material) {
     }
 }
 
-/*
 void parseTexture(const tinyxml2::XMLElement* textureElement, Model& model) {
-    const char* file = textureElement->Attribute("file");
-    if (file) {
-        std::string filepath = std::string("./textures/") + file;
-        ILuint imageID;
-        ilGenImages(1, &imageID);
-        ilBindImage(imageID);
-        if (ilLoadImage(filepath.c_str())) {
-            ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
-            glGenTextures(1, &model.textureID);
-            glBindTexture(GL_TEXTURE_2D, model.textureID);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT), 0, GL_RGBA, GL_UNSIGNED_BYTE, ilGetData());
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        }
-        ilDeleteImages(1, &imageID);
+    const char* filename = textureElement->Attribute("file");
+    std::string fullpath = std::string("./textures/") + filename;
+    int width, height, num_channels;
+    unsigned char* image_data = stbi_load(fullpath.c_str(), &width,&height, &num_channels, STBI_rgb);
+
+    if(!image_data){
+        std::cerr << "Error loading texture: " << fullpath << std::endl;
+        return;
     }
+    glGenTextures(1, &model.textureID);
+    glBindTexture(GL_TEXTURE_2D, model.textureID);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                    GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+                GL_UNSIGNED_BYTE, image_data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    stbi_image_free(image_data);
 }
-*/
 
 void parseModel(const tinyxml2::XMLElement* modelElement, Node& node) {
     for (const tinyxml2::XMLElement* child = modelElement->FirstChildElement(); child; child = child->NextSiblingElement()) {
@@ -309,11 +320,9 @@ void parseModel(const tinyxml2::XMLElement* modelElement, Node& node) {
             model.vbo = 0;
             model.NormalVBO = 0;
             model.TexCoordVBO = 0;
-            /*
             if (child->FirstChildElement("texture")) {
                 parseTexture(child->FirstChildElement("texture"), model);
             }
-            */
 
             if (child->FirstChildElement("color")) {
                 parseColor(child->FirstChildElement("color"), model.material);
@@ -555,6 +564,11 @@ void render_models(Tree tree, std::vector<Transformation> transformations = {}) 
 
         }
 
+        if (model.textureID != 0) {
+            glEnable(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, model.textureID);
+        }
+
         // Set material properties
         glMaterialfv(GL_FRONT, GL_DIFFUSE, model.material.diffuse);
         glMaterialfv(GL_FRONT, GL_AMBIENT, model.material.ambient);
@@ -562,23 +576,31 @@ void render_models(Tree tree, std::vector<Transformation> transformations = {}) 
         glMaterialfv(GL_FRONT, GL_EMISSION, model.material.emissive);
         glMaterialf(GL_FRONT, GL_SHININESS, model.material.shininess);
 
+        // Draw vertices
         glBindBuffer(GL_ARRAY_BUFFER, model.vbo);
         glEnableClientState(GL_VERTEX_ARRAY);
         glVertexPointer(3, GL_FLOAT, sizeof(Vertex), nullptr);
-        glDrawArrays(GL_TRIANGLES, 0, model.triangles.size() * 3);
-        glDisableClientState(GL_VERTEX_ARRAY);
 
+        // Draw normals
         glBindBuffer(GL_ARRAY_BUFFER, model.NormalVBO);
         glEnableClientState(GL_NORMAL_ARRAY);
         glNormalPointer(GL_FLOAT, sizeof(Vertex), nullptr);
-        glDrawArrays(GL_TRIANGLES, 0, model.triangles.size() * 3);
-        glDisableClientState(GL_NORMAL_ARRAY);
 
+        // Draw texture coordinates
         glBindBuffer(GL_ARRAY_BUFFER, model.TexCoordVBO);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
         glTexCoordPointer(2, GL_FLOAT, sizeof(texCoord), nullptr);
+
         glDrawArrays(GL_TRIANGLES, 0, model.triangles.size() * 3);
+
+        glDisableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_NORMAL_ARRAY);
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+        if (model.textureID != 0) {
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glDisable(GL_TEXTURE_2D);
+        }
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -598,6 +620,11 @@ void display() {
               world.camera.lookAtX, world.camera.lookAtY, world.camera.lookAtZ,
               world.camera.upX, world.camera.upY, world.camera.upZ);
 
+    // Apply global transformations
+    glRotatef(rotateAngle_lr, 0.0f, 1.0f, 0.0f);
+    glRotatef(rotateAngle_ud, 0.0f, 0.0f, 1.0f);
+    glTranslatef(translateX, translateY, translateZ);  
+
     // Setup lighting
     // render the lights
     for (size_t i = 0; i < world.lights.size(); ++i) {
@@ -611,7 +638,6 @@ void display() {
                 break;
             }
             case 'D': { // Directional light
-                std::cout << "Light " << i << " position: " << world.lights[i].params[0] << " " << world.lights[i].params[1] << " " << world.lights[i].params[2] << std::endl;
                 float position[4] = { world.lights[i].params[0], world.lights[i].params[1], world.lights[i].params[2], 0.0f };
                 glLightfv(lightID, GL_POSITION, position);
                 break;
@@ -627,17 +653,12 @@ void display() {
             default:
                 break;
         }
-        glEnable(lightID);
 
-        float white[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+        glEnable(lightID);
+        float white[4] = {1.0, 1.0, 1.0, 1.0};
         glLightfv(lightID, GL_DIFFUSE, white);
         glLightfv(lightID, GL_SPECULAR, white);
-    }
-
-    // Apply global transformations
-    glRotatef(rotateAngle_lr, 0.0f, 1.0f, 0.0f);
-    glRotatef(rotateAngle_ud, 0.0f, 0.0f, 1.0f);
-    glTranslatef(translateX, translateY, translateZ);    
+    }  
 
     if(showReferenceAxes){
         referencial();
@@ -718,8 +739,6 @@ int main(int argc, char* argv[]) {
     glutCreateWindow("Engine");
 
     glewInit();
-    //ilInit();
-
     glEnable(GL_RESCALE_NORMAL);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);

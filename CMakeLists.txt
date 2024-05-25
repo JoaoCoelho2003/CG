@@ -12,13 +12,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 add_executable(engine src/engine.cpp src/CatmullRom.cpp)
 add_executable(generator src/generator.cpp src/Figures/Sphere.cpp src/Figures/Cone.cpp src/Figures/Plane.cpp src/Figures/Box.cpp src/Figures/Torus.cpp src/Figures/Patch.cpp)
 
-# Find and include DevIL
-find_package(DevIL REQUIRED)
-if (DevIL_FOUND)
-    include_directories(${DevIL_INCLUDE_DIR})
-    target_link_libraries(engine ${DevIL_LIBRARIES})
-    target_link_libraries(generator ${DevIL_LIBRARIES})
-endif()
+# Include STB Image
+include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # Find and include OpenGL
 find_package(OpenGL REQUIRED)
@@ -60,16 +55,8 @@ else() # Linux and Mac
         message(FATAL_ERROR "GLUT not found!")
     endif()
 
-    set(TOOLKITS_FOLDER "/usr/lib/x86_64-linux-gnu/")
-
-    target_link_libraries(engine ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} tinyxml2 GLEW)
+    target_link_libraries(engine ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} GLEW)
     target_link_libraries(generator ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
-endif()
-
-# Ensure DevIL libraries are linked
-if (DevIL_FOUND)
-    target_link_libraries(engine IL ILU ILUT)
-    target_link_libraries(generator IL ILU ILUT)
 endif()
 
 # Set the output directory for executables
