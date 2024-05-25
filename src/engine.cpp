@@ -359,30 +359,30 @@ void parseLight(const tinyxml2::XMLElement* lightElement, Light& light) {
     {
     case 'P':
         light.params = new float[3];
-        light.params[0] = lightElement->FloatAttribute("posX");
-        light.params[1] = lightElement->FloatAttribute("posY");
-        light.params[2] = lightElement->FloatAttribute("posZ");
+        light.params[0] = lightElement->FloatAttribute("posx");
+        light.params[1] = lightElement->FloatAttribute("posy");
+        light.params[2] = lightElement->FloatAttribute("posz");
         break;
     case 'D':
         light.params = new float[3];
-        light.params[0] = lightElement->FloatAttribute("dirX");
-        light.params[1] = lightElement->FloatAttribute("dirY");
-        light.params[2] = lightElement->FloatAttribute("dirZ");
+        light.params[0] = lightElement->FloatAttribute("dirx");
+        light.params[1] = lightElement->FloatAttribute("diry");
+        light.params[2] = lightElement->FloatAttribute("dirz");
+
         break;
     case 'S':
         light.params = new float[7];
-        light.params[0] = lightElement->FloatAttribute("posX");
-        light.params[1] = lightElement->FloatAttribute("posY");
-        light.params[2] = lightElement->FloatAttribute("posZ");
-        light.params[3] = lightElement->FloatAttribute("dirX");
-        light.params[4] = lightElement->FloatAttribute("dirY");
-        light.params[5] = lightElement->FloatAttribute("dirZ");
+        light.params[0] = lightElement->FloatAttribute("posx");
+        light.params[1] = lightElement->FloatAttribute("posy");
+        light.params[2] = lightElement->FloatAttribute("posz");
+        light.params[3] = lightElement->FloatAttribute("dirx");
+        light.params[4] = lightElement->FloatAttribute("diry");
+        light.params[5] = lightElement->FloatAttribute("dirz");
         light.params[6] = lightElement->FloatAttribute("cutoff");
         break;
     default:
         break;
     }
-
 }
 
 void parseXML(const char* filename, World& tree) {
@@ -600,27 +600,38 @@ void display() {
 
     // Setup lighting
     // render the lights
-    for (const auto& light : world.lights) {
-        GLenum lightEnum;
-        switch (light.type) {
-            case 'P':
-                lightEnum = GL_LIGHT0;
-                glLightfv(lightEnum, GL_POSITION, light.params);
+    for (size_t i = 0; i < world.lights.size(); ++i) {
+        GLenum lightID = GL_LIGHT0 + i;
+        switch (world.lights[i].type) {
+            case 'P': { // Point light
+                // print the position of the light
+                float position[4] = { world.lights[i].params[0], world.lights[i].params[1], world.lights[i].params[2], 1.0f };
+                glLightfv(lightID, GL_POSITION, position);
+                glLightf(lightID, GL_QUADRATIC_ATTENUATION, 0.0f);
                 break;
-            case 'D':
-                lightEnum = GL_LIGHT1;
-                glLightfv(lightEnum, GL_POSITION, light.params);
+            }
+            case 'D': { // Directional light
+                std::cout << "Light " << i << " position: " << world.lights[i].params[0] << " " << world.lights[i].params[1] << " " << world.lights[i].params[2] << std::endl;
+                float position[4] = { world.lights[i].params[0], world.lights[i].params[1], world.lights[i].params[2], 0.0f };
+                glLightfv(lightID, GL_POSITION, position);
                 break;
-            case 'S':
-                lightEnum = GL_LIGHT2;
-                glLightfv(lightEnum, GL_POSITION, light.params);
-                glLightfv(lightEnum, GL_SPOT_DIRECTION, light.params + 3);
-                glLightf(lightEnum, GL_SPOT_CUTOFF, light.params[6]);
+            }
+            case 'S': { // Spotlight
+                float position[4] = { world.lights[i].params[0], world.lights[i].params[1], world.lights[i].params[2], 1.0f };
+                glLightfv(lightID, GL_POSITION, position);
+                glLightfv(lightID, GL_SPOT_DIRECTION, world.lights[i].params + 3);
+                glLightf(lightID, GL_SPOT_CUTOFF, world.lights[i].params[6]);
+                glLightf(lightID, GL_SPOT_EXPONENT, 0.0f);
                 break;
+            }
             default:
-                continue;
+                break;
         }
-        glEnable(lightEnum);
+        glEnable(lightID);
+
+        float white[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+        glLightfv(lightID, GL_DIFFUSE, white);
+        glLightfv(lightID, GL_SPECULAR, white);
     }
 
     // Apply global transformations
@@ -714,7 +725,7 @@ int main(int argc, char* argv[]) {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glEnable(GL_LIGHTING); // Enable lighting
-    glEnable(GL_LIGHT0); // Enable default light
+
     float amb[4] = {1.0f, 1.0f, 1.0f, 1.0f};
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, amb);
 
