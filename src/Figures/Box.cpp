@@ -208,13 +208,13 @@ void Box::generateVertices() {
             float t = (float)i / divisions;
             float t_next = (float)(i + 1) / divisions;
 
-            texCoords.push_back(glm::vec2(s, t));
-            texCoords.push_back(glm::vec2(s, t_next));
-            texCoords.push_back(glm::vec2(s_next, t));
+            texCoords.push_back(glm::vec2(0.0f, s));
+            texCoords.push_back(glm::vec2(0.0f, s_next));
+            texCoords.push_back(glm::vec2(1.0f, s));
 
-            texCoords.push_back(glm::vec2(s_next, t));
-            texCoords.push_back(glm::vec2(s, t_next));
-            texCoords.push_back(glm::vec2(s_next, t_next));
+            texCoords.push_back(glm::vec2(1.0f, s));
+            texCoords.push_back(glm::vec2(0.0f, s_next));
+            texCoords.push_back(glm::vec2(1.0f, s_next));
         }
     }
 
@@ -247,14 +247,14 @@ void Box::generateVertices() {
             float s_next = (float)(j + 1) / divisions;
             float t = (float)i / divisions;
             float t_next = (float)(i + 1) / divisions;
+    
+            texCoords.push_back(glm::vec2(0.0f, s));
+            texCoords.push_back(glm::vec2(1.0f, s_next));
+            texCoords.push_back(glm::vec2(0.0f, s_next));
 
-            texCoords.push_back(glm::vec2(s, t));
-            texCoords.push_back(glm::vec2(s_next, t));
-            texCoords.push_back(glm::vec2(s, t_next));
-
-            texCoords.push_back(glm::vec2(s_next, t));
-            texCoords.push_back(glm::vec2(s_next, t_next));
-            texCoords.push_back(glm::vec2(s, t_next));
+            texCoords.push_back(glm::vec2(0.0f, s));
+            texCoords.push_back(glm::vec2(1.0f, s));
+            texCoords.push_back(glm::vec2(1.0f, s_next));
         }
     }
 }

@@ -60,7 +60,6 @@ void Patch::parseFile() {
     int numControlPoints;
     file >> numControlPoints;
     file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    
     controlPoints.resize(numControlPoints);
 
     for (int i = 0; i < numControlPoints; ++i) {
@@ -111,6 +110,10 @@ void Patch::generateVertices() {
                 vertices.push_back(vertex1);
                 vertices.push_back(vertex2);
 
+                vertices.push_back(vertex0);
+                vertices.push_back(vertex2);
+                vertices.push_back(vertex3);
+
                 normals.push_back(normal0);
                 normals.push_back(normal1);
                 normals.push_back(normal2);
@@ -118,10 +121,6 @@ void Patch::generateVertices() {
                 texCoords.push_back(glm::vec2(u0, v0));
                 texCoords.push_back(glm::vec2(u1, v0));
                 texCoords.push_back(glm::vec2(u1, v1));
-
-                vertices.push_back(vertex0);
-                vertices.push_back(vertex2);
-                vertices.push_back(vertex3);
 
                 normals.push_back(normal0);
                 normals.push_back(normal2);

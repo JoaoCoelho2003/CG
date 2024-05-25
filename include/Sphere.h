@@ -18,6 +18,10 @@ private:
 public:
     Sphere(float r, int sl, int st);
 
+    glm::vec3 calculateVertexPosition(float radius, float theta, float phi);
+
+    glm::vec2 calculateTextureCoordinates(int i, int j);
+
     void generateVertices();
 
     void writeToFile(const std::string& filename);

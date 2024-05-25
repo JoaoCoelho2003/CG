@@ -47,10 +47,11 @@ void Sphere::generateVertices() {
             glm::vec3 n4 = glm::normalize(v4);
 
             // Calculate texture coordinates
-            glm::vec2 t1 = glm::vec2((float)i / slices, (float)j / stacks);
-            glm::vec2 t2 = glm::vec2((float)(i + 1) / slices, (float)j / stacks);
-            glm::vec2 t3 = glm::vec2((float)i / slices, (float)(j + 1) / stacks);
-            glm::vec2 t4 = glm::vec2((float)(i + 1) / slices, (float)(j + 1) / stacks);
+            glm::vec2 t1 = glm::vec2((float)i / slices, 1.0f - (float)j / stacks);
+            glm::vec2 t2 = glm::vec2((float)(i + 1) / slices, 1.0f - (float)j / stacks);
+            glm::vec2 t3 = glm::vec2((float)i / slices, 1.0f - (float)(j + 1) / stacks);
+            glm::vec2 t4 = glm::vec2((float)(i + 1) / slices, 1.0f - (float)(j + 1) / stacks);
+
 
             // Add triangles formed by the quad
             vertices.push_back(v1);
