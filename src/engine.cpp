@@ -26,6 +26,9 @@ bool showReferenceAxes = true;
 bool showCatmullRom = true;
 
 void referencial() {
+    
+    glDisable(GL_LIGHTING);
+
     glBegin(GL_LINES);
 		// X axis in red
 		glColor3f(1.0f, 0.0f, 0.0f);
@@ -40,6 +43,8 @@ void referencial() {
 		glVertex3f(0.0f, 0.0f, -100.0f);
 		glVertex3f(0.0f, 0.0f, 100.0f);
     glEnd();
+
+    glEnable(GL_LIGHTING);
 }
 
 
@@ -273,6 +278,7 @@ void parseColor(const tinyxml2::XMLElement* colorElement, Material& material) {
     }
 }
 
+/*
 void parseTexture(const tinyxml2::XMLElement* textureElement, Model& model) {
     const char* file = textureElement->Attribute("file");
     if (file) {
@@ -291,6 +297,7 @@ void parseTexture(const tinyxml2::XMLElement* textureElement, Model& model) {
         ilDeleteImages(1, &imageID);
     }
 }
+*/
 
 void parseModel(const tinyxml2::XMLElement* modelElement, Node& node) {
     for (const tinyxml2::XMLElement* child = modelElement->FirstChildElement(); child; child = child->NextSiblingElement()) {
@@ -299,9 +306,14 @@ void parseModel(const tinyxml2::XMLElement* modelElement, Node& node) {
             std::string fullpath = std::string("./models/") + filename;
             node.model_name.push_back(fullpath);
             Model model;
+            model.vbo = 0;
+            model.NormalVBO = 0;
+            model.TexCoordVBO = 0;
+            /*
             if (child->FirstChildElement("texture")) {
                 parseTexture(child->FirstChildElement("texture"), model);
             }
+            */
 
             if (child->FirstChildElement("color")) {
                 parseColor(child->FirstChildElement("color"), model.material);
@@ -504,6 +516,7 @@ void render_models(Tree tree, std::vector<Transformation> transformations = {}) 
 
     for (const auto& model_name : tree.node.model_name) {
         Model& model = world.models[model_name];
+
         if (model.vbo == 0) {
             std::cout << "Loading model: " << model_name << std::endl;
             std::ifstream inputFile(model_name);
@@ -512,11 +525,18 @@ void render_models(Tree tree, std::vector<Transformation> transformations = {}) 
                 continue;
             }
 
-            float x, y, z;
+            float x, y, z, nx, ny, nz, s, t;
             Triangle triangle;
             std::vector<Vertex> vertices;
+            std::vector<Vertex> normals;
+            std::vector<texCoord> texCoords;
+
             while (inputFile >> x >> y >> z) {
                 vertices.push_back({x, y, z});
+                inputFile >> nx >> ny >> nz;
+                normals.push_back({nx, ny, nz});
+                inputFile >> s >> t;
+                texCoords.push_back({s, t});
             }
             inputFile.close();
 
@@ -524,6 +544,15 @@ void render_models(Tree tree, std::vector<Transformation> transformations = {}) 
             glBindBuffer(GL_ARRAY_BUFFER, model.vbo);
             glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
             model.triangles.resize(vertices.size() / 3);
+
+            glGenBuffers(1, &model.NormalVBO);
+            glBindBuffer(GL_ARRAY_BUFFER, model.NormalVBO);
+            glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(Vertex), normals.data(), GL_STATIC_DRAW);
+
+            glGenBuffers(1, &model.TexCoordVBO);
+            glBindBuffer(GL_ARRAY_BUFFER, model.TexCoordVBO);
+            glBufferData(GL_ARRAY_BUFFER, texCoords.size() * sizeof(texCoord), texCoords.data(), GL_STATIC_DRAW);
+
         }
 
         // Set material properties
@@ -538,6 +567,18 @@ void render_models(Tree tree, std::vector<Transformation> transformations = {}) 
         glVertexPointer(3, GL_FLOAT, sizeof(Vertex), nullptr);
         glDrawArrays(GL_TRIANGLES, 0, model.triangles.size() * 3);
         glDisableClientState(GL_VERTEX_ARRAY);
+
+        glBindBuffer(GL_ARRAY_BUFFER, model.NormalVBO);
+        glEnableClientState(GL_NORMAL_ARRAY);
+        glNormalPointer(GL_FLOAT, sizeof(Vertex), nullptr);
+        glDrawArrays(GL_TRIANGLES, 0, model.triangles.size() * 3);
+        glDisableClientState(GL_NORMAL_ARRAY);
+
+        glBindBuffer(GL_ARRAY_BUFFER, model.TexCoordVBO);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        glTexCoordPointer(2, GL_FLOAT, sizeof(texCoord), nullptr);
+        glDrawArrays(GL_TRIANGLES, 0, model.triangles.size() * 3);
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -558,29 +599,28 @@ void display() {
               world.camera.upX, world.camera.upY, world.camera.upZ);
 
     // Setup lighting
-    for (size_t i = 0; i < world.lights.size(); ++i) {
-        GLenum lightID = GL_LIGHT0 + i;
-        glEnable(lightID);
-
-        switch (world.lights[i].type) {
-            case 'P': // Point light
-                glLightfv(lightID, GL_POSITION, world.lights[i].params);
+    // render the lights
+    for (const auto& light : world.lights) {
+        GLenum lightEnum;
+        switch (light.type) {
+            case 'P':
+                lightEnum = GL_LIGHT0;
+                glLightfv(lightEnum, GL_POSITION, light.params);
                 break;
-            case 'D': { // Directional light
-                GLfloat position[] = { world.lights[i].params[0], world.lights[i].params[1], world.lights[i].params[2], 0.0f };
-                glLightfv(lightID, GL_POSITION, position);
+            case 'D':
+                lightEnum = GL_LIGHT1;
+                glLightfv(lightEnum, GL_POSITION, light.params);
                 break;
-            }
-            case 'S': { // Spotlight
-                glLightfv(lightID, GL_POSITION, world.lights[i].params);
-                glLightfv(lightID, GL_SPOT_DIRECTION, world.lights[i].params + 3);
-                glLightf(lightID, GL_SPOT_CUTOFF, world.lights[i].params[6]);
-                glLightf(lightID, GL_SPOT_EXPONENT, 2.0f);
+            case 'S':
+                lightEnum = GL_LIGHT2;
+                glLightfv(lightEnum, GL_POSITION, light.params);
+                glLightfv(lightEnum, GL_SPOT_DIRECTION, light.params + 3);
+                glLightf(lightEnum, GL_SPOT_CUTOFF, light.params[6]);
                 break;
-            }
             default:
-                break;
+                continue;
         }
+        glEnable(lightEnum);
     }
 
     // Apply global transformations
@@ -667,7 +707,7 @@ int main(int argc, char* argv[]) {
     glutCreateWindow("Engine");
 
     glewInit();
-    ilInit();
+    //ilInit();
 
     glEnable(GL_RESCALE_NORMAL);
     glEnable(GL_DEPTH_TEST);
@@ -675,6 +715,8 @@ int main(int argc, char* argv[]) {
     glCullFace(GL_BACK);
     glEnable(GL_LIGHTING); // Enable lighting
     glEnable(GL_LIGHT0); // Enable default light
+    float amb[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, amb);
 
     world.camera = {0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 60.0f, 1.0f, 1000.0f};
     world.window = {800, 800};

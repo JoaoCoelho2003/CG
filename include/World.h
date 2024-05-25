@@ -10,8 +10,10 @@
 
 struct Vertex {
     float x, y, z;
-    float nx, ny, nz;
-    float s, t;
+};
+
+struct texCoord {
+    float u, v;
 };
 
 struct Triangle {
@@ -30,6 +32,8 @@ struct Model {
     std::string filename;
     std::vector<Triangle> triangles;
     GLuint vbo;
+    GLuint NormalVBO;
+    GLuint TexCoordVBO;
     GLuint textureID;
     Material material;
 };
