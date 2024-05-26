@@ -12,6 +12,10 @@ void Cone::generateVertices() {
     normals.clear();
     texCoords.clear();
 
+    float c = sqrt(height * height + radius * radius);
+    float nx = height / c;
+    float ny = radius / c;
+
     float height_stack = height / stacks;
 
     for (int i = 0; i < stacks; ++i) {
@@ -62,26 +66,26 @@ void Cone::generateVertices() {
             // Triangle 1
             vertices.push_back(v1);
             vertices.push_back(v2);
-            vertices.push_back(v3);
+            vertices.push_back(v4);
 
             // Triangle 2
-            vertices.push_back(v1);
+            vertices.push_back(v2);
             vertices.push_back(v3);
             vertices.push_back(v4);
 
-            // Normals for each vertex
-            glm::vec3 normal1 = glm::normalize(glm::vec3(v1.x, radius / height, v1.z));
-            glm::vec3 normal2 = glm::normalize(glm::vec3(v2.x, radius / height, v2.z));
-            glm::vec3 normal3 = glm::normalize(glm::vec3(v3.x, radius / height, v3.z));
-            glm::vec3 normal4 = glm::normalize(glm::vec3(v4.x, radius / height, v4.z));
+            // Normals
+            glm::vec3 normal_v1 = glm::normalize(glm::vec3(nx * sin(theta), ny, nx * cos(theta)));
+            glm::vec3 normal_v2 = glm::normalize(glm::vec3(nx * sin(theta_next), ny, nx * cos(theta_next)));
+            glm::vec3 normal_v3 = glm::normalize(glm::vec3(nx * sin(theta_next), ny, nx * cos(theta_next)));
+            glm::vec3 normal_v4 = glm::normalize(glm::vec3(nx * sin(theta), ny, nx * cos(theta)));
 
-            normals.push_back(normal1);
-            normals.push_back(normal2);
-            normals.push_back(normal3);
+            normals.push_back(normal_v1);
+            normals.push_back(normal_v2);
+            normals.push_back(normal_v4);
 
-            normals.push_back(normal1);
-            normals.push_back(normal3);
-            normals.push_back(normal4);
+            normals.push_back(normal_v2);
+            normals.push_back(normal_v3);
+            normals.push_back(normal_v4);
 
             // Texture coordinates
             float s1 = (float)j / slices;
@@ -89,16 +93,17 @@ void Cone::generateVertices() {
             float t1 = (float)i / stacks;
             float t2 = (float)(i + 1) / stacks;
 
-            texCoords.push_back(glm::vec2(s1, t1));
-            texCoords.push_back(glm::vec2(s2, t1));
-            texCoords.push_back(glm::vec2(s1, t2));
+            texCoords.push_back(glm::vec2(s1, -t1));
+            texCoords.push_back(glm::vec2(s2, -t1));
+            texCoords.push_back(glm::vec2(s1, -t2));
 
-            texCoords.push_back(glm::vec2(s2, t1));
-            texCoords.push_back(glm::vec2(s2, t2));
-            texCoords.push_back(glm::vec2(s1, t2));
+            texCoords.push_back(glm::vec2(s2, -t1));
+            texCoords.push_back(glm::vec2(s2, -t2));
+            texCoords.push_back(glm::vec2(s1, -t2));
         }
     }
 }
+
 
 void Cone::writeToFile(const std::string& filename) {
     std::ofstream outputFile(filename);
