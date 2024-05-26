@@ -74,18 +74,17 @@ void Cone::generateVertices() {
             vertices.push_back(v4);
 
             // Normals
-            glm::vec3 normal_v1 = glm::normalize(glm::vec3(nx * sin(theta), ny, nx * cos(theta)));
-            glm::vec3 normal_v2 = glm::normalize(glm::vec3(nx * sin(theta_next), ny, nx * cos(theta_next)));
-            glm::vec3 normal_v3 = glm::normalize(glm::vec3(nx * sin(theta_next), ny, nx * cos(theta_next)));
-            glm::vec3 normal_v4 = glm::normalize(glm::vec3(nx * sin(theta), ny, nx * cos(theta)));
+            glm::vec3 normal = glm::normalize(glm::vec3(nx * sin(theta), ny, nx * cos(theta)));
+            glm::vec3 normal_next = glm::normalize(glm::vec3(nx * sin(theta_next), ny, nx * cos(theta_next)));
 
-            normals.push_back(normal_v1);
-            normals.push_back(normal_v2);
-            normals.push_back(normal_v4);
 
-            normals.push_back(normal_v2);
-            normals.push_back(normal_v3);
-            normals.push_back(normal_v4);
+            normals.push_back(normal);
+            normals.push_back(normal_next);
+            normals.push_back(normal);
+
+            normals.push_back(normal_next);
+            normals.push_back(normal_next);
+            normals.push_back(normal);
 
             // Texture coordinates
             float s1 = (float)j / slices;
