@@ -5,8 +5,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-Patch::Patch(const std::string& filename, int tessLevel)
-    : filename(filename), tessellationLevel(tessLevel) {}
+Patch::Patch(const std::string& filename, int tessLevel): filename(filename), tessellationLevel(tessLevel) {}
 
 glm::vec3 evalBezierCurve(const std::vector<glm::vec3>& P, const float &t) {
     float b0 = (1 - t) * (1 - t) * (1 - t);
@@ -16,23 +15,54 @@ glm::vec3 evalBezierCurve(const std::vector<glm::vec3>& P, const float &t) {
     return P[0] * b0 + P[1] * b1 + P[2] * b2 + P[3] * b3;
 }
 
-glm::vec3 evalBezierPatchNormal(const std::vector<glm::vec3>& controlPoints, const float &u, const float &v) {
-    std::vector<glm::vec3> uCurve(4), vCurve(4);
-    for (int i = 0; i < 4; ++i) {
-        uCurve[i] = evalBezierCurve(std::vector<glm::vec3>{controlPoints.begin() + 4 * i, controlPoints.begin() + 4 * (i + 1)}, u);
-        vCurve[i] = evalBezierCurve(std::vector<glm::vec3>{controlPoints.begin() + i, controlPoints.begin() + i + 4}, v);
-    }
-    glm::vec3 dPdu = glm::normalize(evalBezierCurve(uCurve, v + 0.01f) - evalBezierCurve(uCurve, v - 0.01f));
-    glm::vec3 dPdv = glm::normalize(evalBezierCurve(vCurve, u + 0.01f) - evalBezierCurve(vCurve, u - 0.01f));
-    return glm::normalize(glm::cross(dPdu, dPdv));
+glm::vec3 evalBezierCurveDerivative(const std::vector<glm::vec3>& P, const float &t) {
+    float db0 = -3 * (1 - t) * (1 - t);
+    float db1 = 3 * (1 - t) * (1 - t) - 6 * t * (1 - t);
+    float db2 = 6 * t * (1 - t) - 3 * t * t;
+    float db3 = 3 * t * t;
+    return P[0] * db0 + P[1] * db1 + P[2] * db2 + P[3] * db3;
 }
 
 glm::vec3 evalBezierPatch(const std::vector<glm::vec3>& controlPoints, const float &u, const float &v) {
     std::vector<glm::vec3> uCurve(4);
     for (int i = 0; i < 4; i++) {
-        uCurve[i] = evalBezierCurve(std::vector<glm::vec3>{controlPoints.begin() + 4 * i, controlPoints.begin() + 4 * (i + 1)}, u);
+        uCurve[i] = evalBezierCurve({controlPoints[4*i], controlPoints[4*i+1], controlPoints[4*i+2], controlPoints[4*i+3]}, u);
     }
     return evalBezierCurve(uCurve, v);
+}
+
+glm::vec3 evalBezierPatchNormal(const std::vector<glm::vec3>& controlPoints, const float &u, const float &v) {
+    std::vector<glm::vec3> uCurve(4), vCurve(4);
+    std::vector<glm::vec3> uCurveDerivative(4), vCurveDerivative(4);
+
+    for (int i = 0; i < 4; ++i) {
+        uCurve[i] = evalBezierCurve({controlPoints[4*i], controlPoints[4*i+1], controlPoints[4*i+2], controlPoints[4*i+3]}, u);
+        vCurve[i] = evalBezierCurve({controlPoints[i], controlPoints[4+i], controlPoints[8+i], controlPoints[12+i]}, v);
+
+        uCurveDerivative[i] = evalBezierCurveDerivative({controlPoints[4*i], controlPoints[4*i+1], controlPoints[4*i+2], controlPoints[4*i+3]}, u);
+        vCurveDerivative[i] = evalBezierCurveDerivative({controlPoints[i], controlPoints[4+i], controlPoints[8+i], controlPoints[12+i]}, v);
+    }
+
+    glm::vec3 dPdu = evalBezierCurve(uCurveDerivative, v);
+    glm::vec3 dPdv = evalBezierCurve(vCurveDerivative, u);
+
+    // Add debugging information
+    if (glm::length(dPdu) == 0.0f || glm::length(dPdv) == 0.0f) {
+        std::cerr << "Zero length derivative detected: dPdu = (" 
+                  << dPdu.x << ", " << dPdu.y << ", " << dPdu.z << "), dPdv = ("
+                  << dPdv.x << ", " << dPdv.y << ", " << dPdv.z << ")\n";
+    }
+
+    glm::vec3 normal = glm::cross(dPdu, dPdv);
+
+    if (glm::length(normal) == 0.0f) {
+        std::cerr << "Zero length normal detected: dPdu = ("
+                  << dPdu.x << ", " << dPdu.y << ", " << dPdu.z << "), dPdv = ("
+                  << dPdv.x << ", " << dPdv.y << ", " << dPdv.z << ")\n";
+        return glm::vec3(0.0f, 0.0f, 1.0f);
+    } else {
+        return glm::normalize(normal);
+    }
 }
 
 void Patch::parseFile() {
@@ -64,7 +94,7 @@ void Patch::parseFile() {
     controlPoints.resize(numControlPoints);
 
     for (int i = 0; i < numControlPoints; ++i) {
-        std ::string line;
+        std::string line;
         std::getline(file, line);
         std::istringstream iss(line);
         iss >> controlPoints[i].x;
@@ -84,10 +114,9 @@ void Patch::generateVertices() {
     texCoords.clear();
 
     for (const auto& patch : patches) {
-        std::vector<glm::vec3> controlPointsPatch;
+        std::vector<glm::vec3> controlPointsPatch(16);
         for (int i = 0; i < 16; ++i) {
-            int controlPointIndex = patch[i];
-            controlPointsPatch.push_back(controlPoints[controlPointIndex]);
+            controlPointsPatch[i] = controlPoints[patch[i]];
         }
 
         for (int j = 0; j < tessellationLevel; ++j) {
@@ -106,6 +135,24 @@ void Patch::generateVertices() {
                 glm::vec3 normal1 = evalBezierPatchNormal(controlPointsPatch, u1, v0);
                 glm::vec3 normal2 = evalBezierPatchNormal(controlPointsPatch, u1, v1);
                 glm::vec3 normal3 = evalBezierPatchNormal(controlPointsPatch, u0, v1);
+
+                // Check for NaN normals and handle
+                if (glm::any(glm::isnan(normal0))) {
+                    std::cerr << "NaN normal detected at (u0, v0): (" << u0 << ", " << v0 << ")\n";
+                    normal0 = glm::vec3(0.0f, 0.0f, 1.0f);
+                }
+                if (glm::any(glm::isnan(normal1))) {
+                    std::cerr << "NaN normal detected at (u1, v0): (" << u1 << ", " << v0 << ")\n";
+                    normal1 = glm::vec3(0.0f, 0.0f, 1.0f);
+                }
+                if (glm::any(glm::isnan(normal2))) {
+                    std::cerr << "NaN normal detected at (u1, v1): (" << u1 << ", " << v1 << ")\n";
+                    normal2 = glm::vec3(0.0f, 0.0f, 1.0f);
+                }
+                if (glm::any(glm::isnan(normal3))) {
+                    std::cerr << "NaN normal detected at (u0, v1): (" << u0 << ", " << v1 << ")\n";
+                    normal3 = glm::vec3(0.0f, 0.0f, 1.0f);
+                }
 
                 vertices.push_back(vertex0);
                 vertices.push_back(vertex1);
@@ -150,4 +197,3 @@ void Patch::writeToFile(const std::string& filename) {
 
     outFile.close();
 }
-
