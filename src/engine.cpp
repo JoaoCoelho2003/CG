@@ -283,26 +283,24 @@ void parseTexture(const tinyxml2::XMLElement* textureElement, Model& model) {
     const char* filename = textureElement->Attribute("file");
     std::string fullpath = std::string("./textures/") + filename;
     int width, height, num_channels;
-    unsigned char* image_data = stbi_load(fullpath.c_str(), &width,&height, &num_channels, STBI_rgb);
+    unsigned char* image_data = stbi_load(fullpath.c_str(), &width, &height, &num_channels, STBI_rgb);
 
-    if(!image_data){
+    if (!image_data) {
         std::cerr << "Error loading texture: " << fullpath << std::endl;
         return;
     }
+
     glGenTextures(1, &model.textureID);
     glBindTexture(GL_TEXTURE_2D, model.textureID);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                    GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-                GL_UNSIGNED_BYTE, image_data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image_data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
     glBindTexture(GL_TEXTURE_2D, 0);
