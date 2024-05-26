@@ -209,11 +209,11 @@ void Box::generateVertices() {
             float t_next = (float)(i + 1) / divisions;
 
             texCoords.push_back(glm::vec2(s, t));
-            texCoords.push_back(glm::vec2(s, t_next));
             texCoords.push_back(glm::vec2(s_next, t));
+            texCoords.push_back(glm::vec2(s, t_next));
 
-            texCoords.push_back(glm::vec2(s_next, t));
             texCoords.push_back(glm::vec2(s, t_next));
+            texCoords.push_back(glm::vec2(s_next, t));
             texCoords.push_back(glm::vec2(s_next, t_next));
         }
     }
@@ -249,12 +249,12 @@ void Box::generateVertices() {
             float t_next = (float)(i + 1) / divisions;
 
             texCoords.push_back(glm::vec2(s, t));
-            texCoords.push_back(glm::vec2(s_next, t));
             texCoords.push_back(glm::vec2(s, t_next));
+            texCoords.push_back(glm::vec2(s_next, t));
 
-            texCoords.push_back(glm::vec2(s_next, t));
-            texCoords.push_back(glm::vec2(s_next, t_next));
             texCoords.push_back(glm::vec2(s, t_next));
+            texCoords.push_back(glm::vec2(s_next, t_next));
+            texCoords.push_back(glm::vec2(s_next, t));
         }
     }
 }
