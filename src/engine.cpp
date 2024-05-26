@@ -25,11 +25,12 @@ float movementSpeed = 0.1f;
 bool cursorVisible = true;
 bool showReferenceAxes = true;
 bool showCatmullRom = false;
+bool lightsPresent = false;
 
 void referencial() {
-    
-    glDisable(GL_LIGHTING);
-
+    if(lightsPresent){
+        glDisable(GL_LIGHTING);
+    }
     glBegin(GL_LINES);
 		// X axis in red
 		glColor3f(1.0f, 0.0f, 0.0f);
@@ -45,7 +46,9 @@ void referencial() {
 		glVertex3f(0.0f, 0.0f, 100.0f);
     glEnd();
 
-    glEnable(GL_LIGHTING);
+    if(lightsPresent){
+        glEnable(GL_LIGHTING);
+    }
 }
 
 
@@ -439,10 +442,14 @@ void parseXML(const char* filename, World& tree) {
     tinyxml2::XMLElement* lights = root->FirstChildElement("lights");
     if (lights) {
         for (tinyxml2::XMLElement* light = lights->FirstChildElement("light"); light; light = light->NextSiblingElement("light")) {
+            lightsPresent = true;
             Light newLight;
             parseLight(light, newLight);
             world.lights.push_back(newLight);
         }
+    }
+    else {
+        glDisable(GL_LIGHTING);
     }
 
     tinyxml2::XMLElement* groupElement = root->FirstChildElement("group");
