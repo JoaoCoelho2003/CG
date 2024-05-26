@@ -9,16 +9,20 @@ Cone::Cone(float h, float r, int sl, int st) : height(h), radius(r), slices(sl),
 
 void Cone::generateVertices() {
     vertices.clear();
+    normals.clear();
+    texCoords.clear();
+
+    float c = sqrt(height * height + radius * radius);
+    float nx = height / c;
+    float ny = radius / c;
 
     float height_stack = height / stacks;
 
-    // Generate vertices for each stack and slice
     for (int i = 0; i < stacks; ++i) {
         float stack_height = i * height_stack;
         float radius_at_stack = radius * (1 - stack_height / height);
         float stack_height_next = (i + 1) * height_stack;
         float radius_at_stack_next = radius * (1 - stack_height_next / height);
-
 
         for (int j = 0; j < slices; ++j) {
             float theta = j * 2 * M_PI / slices;
@@ -41,25 +45,65 @@ void Cone::generateVertices() {
             v4.y = stack_height_next;
             v4.z = radius_at_stack_next * cos(theta);
 
-            // Bottom 
+            // Bottom face
             if (i == 0) {
+                glm::vec3 normal_bottom(0.0f, -1.0f, 0.0f);
+                glm::vec3 center_bottom(0.0f, 0.0f, 0.0f);
+
                 vertices.push_back(v1);
+                vertices.push_back(center_bottom);
                 vertices.push_back(v2);
-                vertices.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+
+                normals.push_back(normal_bottom);
+                normals.push_back(normal_bottom);
+                normals.push_back(normal_bottom);
+
+                texCoords.push_back(glm::vec2(v1.x / radius + 0.5f, v1.z / radius + 0.5f));
+                texCoords.push_back(glm::vec2(0.5f, 0.5f));
+                texCoords.push_back(glm::vec2(v2.x / radius + 0.5f, v2.z / radius + 0.5f));
             }
 
             // Triangle 1
             vertices.push_back(v1);
-            vertices.push_back(v3);
             vertices.push_back(v2);
+            vertices.push_back(v4);
 
             // Triangle 2
-            vertices.push_back(v1);
-            vertices.push_back(v4);
+            vertices.push_back(v2);
             vertices.push_back(v3);
+            vertices.push_back(v4);
+
+            // Normals
+            glm::vec3 normal_v1 = glm::normalize(glm::vec3(nx * sin(theta), ny, nx * cos(theta)));
+            glm::vec3 normal_v2 = glm::normalize(glm::vec3(nx * sin(theta_next), ny, nx * cos(theta_next)));
+            glm::vec3 normal_v3 = glm::normalize(glm::vec3(nx * sin(theta_next), ny, nx * cos(theta_next)));
+            glm::vec3 normal_v4 = glm::normalize(glm::vec3(nx * sin(theta), ny, nx * cos(theta)));
+
+            normals.push_back(normal_v1);
+            normals.push_back(normal_v2);
+            normals.push_back(normal_v4);
+
+            normals.push_back(normal_v2);
+            normals.push_back(normal_v3);
+            normals.push_back(normal_v4);
+
+            // Texture coordinates
+            float s1 = (float)j / slices;
+            float s2 = (float)(j + 1) / slices;
+            float t1 = (float)i / stacks;
+            float t2 = (float)(i + 1) / stacks;
+
+            texCoords.push_back(glm::vec2(s1, -t1));
+            texCoords.push_back(glm::vec2(s2, -t1));
+            texCoords.push_back(glm::vec2(s1, -t2));
+
+            texCoords.push_back(glm::vec2(s2, -t1));
+            texCoords.push_back(glm::vec2(s2, -t2));
+            texCoords.push_back(glm::vec2(s1, -t2));
         }
     }
 }
+
 
 void Cone::writeToFile(const std::string& filename) {
     std::ofstream outputFile(filename);
@@ -68,7 +112,9 @@ void Cone::writeToFile(const std::string& filename) {
         return;
     }
     for (size_t i = 0; i < vertices.size(); ++i) {
-        outputFile << vertices[i].x << " " << vertices[i].y << " " << vertices[i].z << std::endl;
+        outputFile << vertices[i].x << " " << vertices[i].y << " " << vertices[i].z << " "
+                   << normals[i].x << " " << normals[i].y << " " << normals[i].z << " "
+                   << texCoords[i].x << " " << texCoords[i].y << std::endl;
     }
 
     outputFile.close();

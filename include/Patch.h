@@ -12,7 +12,10 @@ class Patch {
         int numPatches;
         std::vector<std::vector<int>> patches;
         std::vector<glm::vec3> controlPoints;
+
         std::vector<glm::vec3> vertices;
+        std::vector<glm::vec3> normals;
+        std::vector<glm::vec2> texCoords;
 
     public:
         Patch(const std::string& filename, int tessLevel);

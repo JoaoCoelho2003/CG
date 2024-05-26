@@ -10,6 +10,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "../include/CatmullRom.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "../include/stb_image.h"
 
 World world;
 
@@ -22,9 +24,13 @@ float scaleHeight = 1.0f;
 float movementSpeed = 0.1f;
 bool cursorVisible = true;
 bool showReferenceAxes = true;
-bool showCatmullRom = true;
+bool showCatmullRom = false;
+bool lightsPresent = false;
 
 void referencial() {
+    if(lightsPresent){
+        glDisable(GL_LIGHTING);
+    }
     glBegin(GL_LINES);
 		// X axis in red
 		glColor3f(1.0f, 0.0f, 0.0f);
@@ -39,6 +45,10 @@ void referencial() {
 		glVertex3f(0.0f, 0.0f, -100.0f);
 		glVertex3f(0.0f, 0.0f, 100.0f);
     glEnd();
+
+    if(lightsPresent){
+        glEnable(GL_LIGHTING);
+    }
 }
 
 
@@ -208,14 +218,7 @@ void parseTransform(const tinyxml2::XMLElement* transformElement, Node& node) {
             }
         } else if (strcmp(type, "scale") == 0) {
             transform.type = TransformationType::SCALE;
-        } else if (strcmp(type, "color") == 0) {
-            transform.type = TransformationType::COLOR;
-            transform.values.push_back(child->FloatAttribute("r"));
-            transform.values.push_back(child->FloatAttribute("g"));
-            transform.values.push_back(child->FloatAttribute("b"));
-
-        }
-        else {
+        } else {
             std::cerr << "Error: Unknown transformation type: " << type << std::endl;
             continue;
         }
@@ -244,12 +247,90 @@ void parseTransform(const tinyxml2::XMLElement* transformElement, Node& node) {
     }   
 }
 
+void parseColor(const tinyxml2::XMLElement* colorElement, Material& material) {
+    const tinyxml2::XMLElement* diffuse = colorElement->FirstChildElement("diffuse");
+    if (diffuse) {
+        material.diffuse[0] = diffuse->FloatAttribute("R") / 255.0f;
+        material.diffuse[1] = diffuse->FloatAttribute("G") / 255.0f;
+        material.diffuse[2] = diffuse->FloatAttribute("B") / 255.0f;
+    }
+
+    const tinyxml2::XMLElement* ambient = colorElement->FirstChildElement("ambient");
+    if (ambient) {
+        material.ambient[0] = ambient->FloatAttribute("R") / 255.0f;
+        material.ambient[1] = ambient->FloatAttribute("G") / 255.0f;
+        material.ambient[2] = ambient->FloatAttribute("B") / 255.0f;
+    }
+
+    const tinyxml2::XMLElement* specular = colorElement->FirstChildElement("specular");
+    if (specular) {
+        material.specular[0] = specular->FloatAttribute("R") / 255.0f;
+        material.specular[1] = specular->FloatAttribute("G") / 255.0f;
+        material.specular[2] = specular->FloatAttribute("B") / 255.0f;
+    }
+
+    const tinyxml2::XMLElement* emissive = colorElement->FirstChildElement("emissive");
+    if (emissive) {
+        material.emissive[0] = emissive->FloatAttribute("R") / 255.0f;
+        material.emissive[1] = emissive->FloatAttribute("G") / 255.0f;
+        material.emissive[2] = emissive->FloatAttribute("B") / 255.0f;
+    }
+
+    const tinyxml2::XMLElement* shininess = colorElement->FirstChildElement("shininess");
+    if (shininess) {
+        material.shininess = shininess->FloatAttribute("value");
+    }
+}
+
+void parseTexture(const tinyxml2::XMLElement* textureElement, Model& model) {
+    const char* filename = textureElement->Attribute("file");
+    std::string fullpath = std::string("./textures/") + filename;
+    std:: cout << "Loading texture:" << fullpath << std::endl;
+    int width, height, num_channels;
+    unsigned char* image_data = stbi_load(fullpath.c_str(), &width, &height, &num_channels, STBI_rgb);
+
+    if (!image_data) {
+        std::cerr << "Error loading texture: " << fullpath << std::endl;
+        return;
+    }
+
+    glGenTextures(1, &model.textureID);
+    glBindTexture(GL_TEXTURE_2D, model.textureID);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image_data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    stbi_image_free(image_data);
+}
+
 void parseModel(const tinyxml2::XMLElement* modelElement, Node& node) {
-    for(const tinyxml2::XMLElement* child = modelElement->FirstChildElement(); child; child = child->NextSiblingElement()) {   
+    for (const tinyxml2::XMLElement* child = modelElement->FirstChildElement(); child; child = child->NextSiblingElement()) {
         const char* filename = child->Attribute("file");
         if (filename) {
             std::string fullpath = std::string("./models/") + filename;
             node.model_name.push_back(fullpath);
+            Model model;
+            model.vbo = 0;
+            model.NormalVBO = 0;
+            model.TexCoordVBO = 0;
+            if (child->FirstChildElement("texture")) {
+                parseTexture(child->FirstChildElement("texture"), model);
+            }
+
+            if (child->FirstChildElement("color")) {
+                parseColor(child->FirstChildElement("color"), model.material);
+            }
+
+            world.models[fullpath] = model;
         }
     }
 }
@@ -268,6 +349,50 @@ void parseGroup(const tinyxml2::XMLElement* groupElement, Tree& tree) {
         } else {
             std::cerr << "Error: Unknown element type: " << type << std::endl;
         }
+    }
+}
+
+void parseLight(const tinyxml2::XMLElement* lightElement, Light& light) {
+    const char* type = lightElement->Attribute("type");
+
+    if (strcmp(type, "point") == 0) {
+        light.type = 'P';
+    } else if (strcmp(type, "directional") == 0) {
+        light.type = 'D';
+    } else if (strcmp(type, "spotlight") == 0) {
+        light.type = 'S';
+    } else {
+        std::cerr << "Error: Unknown light type: " << type << std::endl;
+        return;
+    }
+
+    switch (light.type)
+    {
+    case 'P':
+        light.params = new float[3];
+        light.params[0] = lightElement->FloatAttribute("posx");
+        light.params[1] = lightElement->FloatAttribute("posy");
+        light.params[2] = lightElement->FloatAttribute("posz");
+        break;
+    case 'D':
+        light.params = new float[3];
+        light.params[0] = lightElement->FloatAttribute("dirx");
+        light.params[1] = lightElement->FloatAttribute("diry");
+        light.params[2] = lightElement->FloatAttribute("dirz");
+
+        break;
+    case 'S':
+        light.params = new float[7];
+        light.params[0] = lightElement->FloatAttribute("posx");
+        light.params[1] = lightElement->FloatAttribute("posy");
+        light.params[2] = lightElement->FloatAttribute("posz");
+        light.params[3] = lightElement->FloatAttribute("dirx");
+        light.params[4] = lightElement->FloatAttribute("diry");
+        light.params[5] = lightElement->FloatAttribute("dirz");
+        light.params[6] = lightElement->FloatAttribute("cutoff");
+        break;
+    default:
+        break;
     }
 }
 
@@ -314,13 +439,26 @@ void parseXML(const char* filename, World& tree) {
         std::cerr << "Error: Missing <window> element in XML file." << std::endl;
     }
 
+    tinyxml2::XMLElement* lights = root->FirstChildElement("lights");
+    if (lights) {
+        for (tinyxml2::XMLElement* light = lights->FirstChildElement("light"); light; light = light->NextSiblingElement("light")) {
+            lightsPresent = true;
+            Light newLight;
+            parseLight(light, newLight);
+            world.lights.push_back(newLight);
+        }
+    }
+    else {
+        glDisable(GL_LIGHTING);
+    }
+
     tinyxml2::XMLElement* groupElement = root->FirstChildElement("group");
     if(groupElement) {
         parseGroup(groupElement, world.tree);
     }
 }
 
-void render_models(Tree tree,std::vector<Transformation> transformations = {}) {
+void render_models(Tree tree, std::vector<Transformation> transformations = {}) {
     for (auto& transform : tree.node.transformations) {
         transformations.push_back(transform);
     }
@@ -388,15 +526,12 @@ void render_models(Tree tree,std::vector<Transformation> transformations = {}) {
                 }
                 break;
             }
-            case TransformationType::COLOR:
-
-                glColor3f(transformation.values[0],transformation.values[1],transformation.values[2]);
-                break;
         }
     }
 
     for (const auto& model_name : tree.node.model_name) {
         Model& model = world.models[model_name];
+
         if (model.vbo == 0) {
             std::cout << "Loading model: " << model_name << std::endl;
             std::ifstream inputFile(model_name);
@@ -405,11 +540,18 @@ void render_models(Tree tree,std::vector<Transformation> transformations = {}) {
                 continue;
             }
 
-            float x, y, z;
+            float x, y, z, nx, ny, nz, s, t;
             Triangle triangle;
             std::vector<Vertex> vertices;
+            std::vector<Vertex> normals;
+            std::vector<texCoord> texCoords;
+
             while (inputFile >> x >> y >> z) {
                 vertices.push_back({x, y, z});
+                inputFile >> nx >> ny >> nz;
+                normals.push_back({nx, ny, nz});
+                inputFile >> s >> t;
+                texCoords.push_back({s, t});
             }
             inputFile.close();
 
@@ -417,20 +559,61 @@ void render_models(Tree tree,std::vector<Transformation> transformations = {}) {
             glBindBuffer(GL_ARRAY_BUFFER, model.vbo);
             glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
             model.triangles.resize(vertices.size() / 3);
+
+            glGenBuffers(1, &model.NormalVBO);
+            glBindBuffer(GL_ARRAY_BUFFER, model.NormalVBO);
+            glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(Vertex), normals.data(), GL_STATIC_DRAW);
+
+            glGenBuffers(1, &model.TexCoordVBO);
+            glBindBuffer(GL_ARRAY_BUFFER, model.TexCoordVBO);
+            glBufferData(GL_ARRAY_BUFFER, texCoords.size() * sizeof(texCoord), texCoords.data(), GL_STATIC_DRAW);
+
         }
 
+        if (model.textureID != 0) {
+            glEnable(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, model.textureID);
+        }
+
+        // Set material properties
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, model.material.diffuse);
+        glMaterialfv(GL_FRONT, GL_AMBIENT, model.material.ambient);
+        glMaterialfv(GL_FRONT, GL_SPECULAR, model.material.specular);
+        glMaterialfv(GL_FRONT, GL_EMISSION, model.material.emissive);
+        glMaterialf(GL_FRONT, GL_SHININESS, model.material.shininess);
+
+        // Draw vertices
         glBindBuffer(GL_ARRAY_BUFFER, model.vbo);
         glEnableClientState(GL_VERTEX_ARRAY);
         glVertexPointer(3, GL_FLOAT, sizeof(Vertex), nullptr);
+
+        // Draw normals
+        glBindBuffer(GL_ARRAY_BUFFER, model.NormalVBO);
+        glEnableClientState(GL_NORMAL_ARRAY);
+        glNormalPointer(GL_FLOAT, sizeof(Vertex), nullptr);
+
+        // Draw texture coordinates
+        glBindBuffer(GL_ARRAY_BUFFER, model.TexCoordVBO);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        glTexCoordPointer(2, GL_FLOAT, sizeof(texCoord), nullptr);
+
         glDrawArrays(GL_TRIANGLES, 0, model.triangles.size() * 3);
+
         glDisableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_NORMAL_ARRAY);
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+        if (model.textureID != 0) {
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glDisable(GL_TEXTURE_2D);
+        }
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glPopMatrix();
 
     for (auto& child : tree.children) {
-        render_models(child,transformations);
+        render_models(child, transformations);
     }
 }
 
@@ -446,13 +629,49 @@ void display() {
     // Apply global transformations
     glRotatef(rotateAngle_lr, 0.0f, 1.0f, 0.0f);
     glRotatef(rotateAngle_ud, 0.0f, 0.0f, 1.0f);
-    glTranslatef(translateX, translateY, translateZ);    
+    glTranslatef(translateX, translateY, translateZ);  
+
+    // Setup lighting
+    // render the lights
+    for (size_t i = 0; i < world.lights.size(); ++i) {
+        GLenum lightID = GL_LIGHT0 + i;
+        switch (world.lights[i].type) {
+            case 'P': { // Point light
+                // print the position of the light
+                float position[4] = { world.lights[i].params[0], world.lights[i].params[1], world.lights[i].params[2], 1.0f };
+                glLightfv(lightID, GL_POSITION, position);
+                glLightf(lightID, GL_QUADRATIC_ATTENUATION, 0.0f);
+                break;
+            }
+            case 'D': { // Directional light
+                float position[4] = { world.lights[i].params[0], world.lights[i].params[1], world.lights[i].params[2], 0.0f };
+                glLightfv(lightID, GL_POSITION, position);
+                break;
+            }
+            case 'S': { // Spotlight
+                float position[4] = { world.lights[i].params[0], world.lights[i].params[1], world.lights[i].params[2], 1.0f };
+                glLightfv(lightID, GL_POSITION, position);
+                glLightfv(lightID, GL_SPOT_DIRECTION, world.lights[i].params + 3);
+                glLightf(lightID, GL_SPOT_CUTOFF, world.lights[i].params[6]);
+                glLightf(lightID, GL_SPOT_EXPONENT, 0.0f);
+                break;
+            }
+            default:
+                break;
+        }
+
+        glEnable(lightID);
+        float white[4] = {1.0, 1.0, 1.0, 1.0};
+        glLightfv(lightID, GL_DIFFUSE, white);
+        glLightfv(lightID, GL_SPECULAR, white);
+    }  
 
     if(showReferenceAxes){
         referencial();
     }
     glColor3f(1.0f, 1.0f, 1.0f);
 
+    // Draw models with materials
     render_models(world.tree);
 
     glutSwapBuffers();
@@ -525,15 +744,15 @@ int main(int argc, char* argv[]) {
     glutInitWindowSize(800, 800);
     glutCreateWindow("Engine");
 
-    GLenum err = glewInit();
-    if (err != GLEW_OK) {
-        fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
-    }
-    
-
+    glewInit();
+    glEnable(GL_RESCALE_NORMAL);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
+    glEnable(GL_LIGHTING); // Enable lighting
+
+    float amb[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, amb);
 
     world.camera = {0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 60.0f, 1.0f, 1000.0f};
     world.window = {800, 800};

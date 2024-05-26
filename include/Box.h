@@ -11,6 +11,8 @@ private:
     float divisions;
 
     std::vector<glm::vec3> vertices;
+    std::vector<glm::vec3> normals;
+    std::vector<glm::vec2> texCoords;
 
 public:
     Box(float dim, float div);

@@ -13,6 +13,8 @@ private:
     int stacks;
 
     std::vector<glm::vec3> vertices;
+    std::vector<glm::vec3> normals;
+    std::vector<glm::vec2> texCoords;
 
 public:
     Torus(float r,float tr, int sl, int st);
