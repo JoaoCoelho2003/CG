@@ -24,7 +24,7 @@ float scaleHeight = 1.0f;
 float movementSpeed = 0.1f;
 bool cursorVisible = true;
 bool showReferenceAxes = true;
-bool showCatmullRom = true;
+bool showCatmullRom = false;
 
 void referencial() {
     
@@ -282,6 +282,7 @@ void parseColor(const tinyxml2::XMLElement* colorElement, Material& material) {
 void parseTexture(const tinyxml2::XMLElement* textureElement, Model& model) {
     const char* filename = textureElement->Attribute("file");
     std::string fullpath = std::string("./textures/") + filename;
+    std:: cout << "Loading texture:" << fullpath << std::endl;
     int width, height, num_channels;
     unsigned char* image_data = stbi_load(fullpath.c_str(), &width, &height, &num_channels, STBI_rgb);
 

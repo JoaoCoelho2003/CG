@@ -6,41 +6,69 @@
         <up x="0" y="1" z="0" />
         <projection fov="60" near="1" far="1000" />
     </camera>
+    <lights>
+        <light type="point" posx="0" posy="0" posz="0" />
+    </lights>
 
     <group>
         <!-- Sun -->
-        <transform>
-            <color r="1.0" g="0.7" b="0.0" />
-            <translate x="0" y="0" z="0" />
-            <scale x="1.0" y="1.0" z="1.0" />
-        </transform>
-        <models>
-            <model file="templateSphere.3d" /> <!-- ./generator sphere 10 24 24 templateSphere.3d -->
-        </models>
+        <group> 
+            <transform>
+                <translate x="0" y="0" z="0" />
+                <scale x="1.0" y="1.0" z="1.0" />
+                <rotate time="60" x="0" y="1" z="0" />
+            </transform>
+            <models>
+                <model file="sun.3d" > <!-- ./bin/generator sphere 10 24 24 sun.3d -->
+                    <texture file="sun_SolarSystem.jpg" />
+                    <color>
+                        <diffuse R="200" G="200" B="200" />
+                        <ambient R="50" G="50" B="50" />
+                        <specular R="0" G="0" B="0" />
+                        <emissive R="255" G="255" B="255" />
+                        <shininess value="0" />
+                    </color>
+                </model>
+            </models>
+        </group>
 
         <!-- Asteroid -->
         <group>
             <transform>
-                <color r="1.0" g="1.0" b="1.0" />
                 <translate time="20" align="true">
                     <point x="50" y="0" z="0" />
                     <point x="20" y="0" z="-90" />
                     <point x="-50" y="0" z="0" />
                     <point x="-20" y="0" z="90" />
                 </translate>
-                <color r="0.0" g="0.0" b="1.0" />
                 <rotate time="20" x="0" y="1" z="0" />
                 <scale x="0.4" y="0.4" z="0.4" />
             </transform>
             <models>
-                <model file="bezier_10.3d" /> <!-- ./generator patch teapot.patch 10 bezier_10.3d -->
+                <model file="comet.3d" > <!-- ./bin/generator patch teapot.patch 10 comet.3d -->
+                    <texture file="moonExample1.jpg" />
+                </model>
             </models>
+        </group>
+
+        <group>
+            <models>
+                <model file="background.3d"> <!-- ./bin/generator sphere 700 24 24 background.3d -->
+                    <texture file="background.jpg" />
+                    <color>
+                        <ambient R="255" G="255" B="255" />
+                    </color>
+                </model>
+            </models>
+            <transform>
+                <scale x="-1" y="-1" z="-1" />
+                <rotate angle="180" x="1" y="0" z="0" />
+            </transform>
         </group>
 
         <!-- Mercury -->
         <group>
             <transform>
-                <color r="1.0" g="1.0" b="1.0" />
                 <translate time="20" align="true">
                     <point x="70" y="0" z="0" />
                     <point x="49.497" y="0" z="-49.497" />
@@ -56,14 +84,15 @@
                 <scale x="0.2" y="0.2" z="0.2" />
             </transform>
             <models>
-                <model file="templateSphere.3d" />
+                <model file="mercury.3d" > <!-- ./bin/generator sphere 10 24 24 mercury.3d -->
+                    <texture file="mercury_SolarSystem.jpg" />
+                </model>
             </models>
         </group>
 
         <!-- Venus -->
         <group>
             <transform>
-                <color r="1.0" g="1.0" b="1.0" />
                 <translate time="30" align="true">
                     <point x="100" y="0" z="0" />
                     <point x="70" y="0" z="-70" />
@@ -78,15 +107,15 @@
                 <scale x="0.3" y="0.3" z="0.3" />
             </transform>
             <models>
-                <model file="templateSphere.3d" />
+                <model file="venus.3d" > <!-- ./bin/generator sphere 10 24 24 venus.3d -->
+                    <texture file="venus_SolarSystem.jpg" />
+                </model>
             </models>
         </group>
-
 
         <!-- Earth -->
         <group>
             <transform>
-                <color r="1.0" g="1.0" b="1.0" />
                 <translate time="50" align="true">
                     <point x="140" y="0" z="0" />
                     <point x="100" y="0" z="-100" />
@@ -102,7 +131,9 @@
                 <scale x="0.4" y="0.4" z="0.4" />
             </transform>
             <models>
-                <model file="templateSphere.3d" />
+                <model file="earth.3d" > <!-- ./bin/generator sphere 10 24 24 earth.3d -->
+                    <texture file="earth_SolarSystem.jpg" />
+                </model>
             </models>
             <!-- Moon -->
             <group>
@@ -120,7 +151,9 @@
                 </transform>
 
                 <models>
-                    <model file="templateSphere.3d" />
+                    <model file="moon.3d" > <!-- ./bin/generator sphere 10 24 24 moon.3d -->
+                        <texture file="moon_SolarSystem.jpg" />
+                    </model>
                 </models>
             </group>
         </group>
@@ -128,7 +161,6 @@
         <!-- Mars -->
         <group>
             <transform>
-                <color r="1.0" g="1.0" b="1.0" />
                 <translate time="70" align="true">
                     <point x="180" y="0" z="0" />
                     <point x="127.279" y="0" z="-127.279" />
@@ -141,10 +173,12 @@
                 </translate>
 
                 <rotate time="25" x="0" y="1" z="0" />
-                <scale x="0.5" y="0.5" z="0.5" />
+                <scale x="0.35" y="0.35" z="0.35" />
             </transform>
             <models>
-                <model file="templateSphere.3d" />
+                <model file="mars.3d" > <!-- ./bin/generator sphere 10 24 24 mars.3d -->
+                    <texture file="mars_SolarSystem.jpg" />
+                </model>
             </models>
             <!-- Moons of Mars -->
             <group>
@@ -160,7 +194,9 @@
                     <scale x="0.1" y="0.1" z="0.1" />
                 </transform>
                 <models>
-                    <model file="templateSphere.3d" />
+                    <model file="phobos.3d" > <!-- ./bin/generator sphere 10 24 24 phobos.3d -->
+                        <texture file="moonExample1.jpg" />
+                    </model>
                 </models>
             </group>
             <group>
@@ -176,7 +212,9 @@
                     <scale x="0.08" y="0.08" z="0.08" />
                 </transform>
                 <models>
-                    <model file="templateSphere.3d" />
+                    <model file="deimos.3d" > <!-- ./bin/generator sphere 10 24 24 deimos.3d -->
+                        <texture file="moonExample4.jpg" />
+                    </model>
                 </models>
             </group>
         </group>
@@ -184,23 +222,24 @@
         <!-- Jupiter -->
         <group>
             <transform>
-                <color r="1.0" g="1.0" b="1.0" />
-                <translate time="80" align="true">
-                    <point x="240" y="0" z="0" />
-                    <point x="169.705" y="0" z="-169.705" />
-                    <point x="0" y="0" z="-240" />
-                    <point x="-169.705" y="0" z="-169.705" />
-                    <point x="-240" y="0" z="0" />
-                    <point x="-169.705" y="0" z="169.705" />
-                    <point x="0" y="0" z="240" />
-                    <point x="169.705" y="0" z="169.705" />
+                <translate time="100" align="true">
+                    <point x="250" y="0" z="0" />
+                    <point x="176.777" y="0" z="-176.777" />
+                    <point x="0" y="0" z="-250" />
+                    <point x="-176.777" y="0" z="-176.777" />
+                    <point x="-250" y="0" z="0" />
+                    <point x="-176.777" y="0" z="176.777" />
+                    <point x="0" y="0" z="250" />
+                    <point x="176.777" y="0" z="176.777" />
                 </translate>
 
-                <rotate time="35" x="0" y="1" z="0" />
+                <rotate time="30" x="0" y="1" z="0" />
                 <scale x="0.7" y="0.7" z="0.7" />
             </transform>
             <models>
-                <model file="templateSphere.3d" />
+                <model file="jupiter.3d" > <!-- ./bin/generator sphere 10 24 24 jupiter.3d -->
+                    <texture file="jupiter_SolarSystem.jpg" />
+                </model>
             </models>
             <!-- Moons of Jupiter -->
             <group>
@@ -216,7 +255,9 @@
                     <scale x="0.15" y="0.15" z="0.15" />
                 </transform>
                 <models>
-                    <model file="templateSphere.3d" />
+                    <model file="io.3d" > <!-- ./bin/generator sphere 10 24 24 io.3d -->
+                        <texture file="moonExample1.jpg" />
+                    </model>
                 </models>
             </group>
             <group>
@@ -232,7 +273,9 @@
                     <scale x="0.12" y="0.12" z="0.12" />
                 </transform>
                 <models>
-                    <model file="templateSphere.3d" />
+                    <model file="europa.3d" > <!-- ./bin/generator sphere 10 24 24 europa.3d -->
+                        <texture file="moonExample3.jpg" />
+                    </model>
                 </models>
             </group>
         </group>
@@ -240,40 +283,42 @@
         <!-- Saturn -->
         <group>
             <transform>
-                <color r="1.0" g="1.0" b="1.0" />
-                <translate time="100" align="true">
-                    <point x="340" y="0" z="0" />
-                    <point x="240.445" y="0" z="-240.445" />
-                    <point x="0" y="0" z="-340" />
-                    <point x="-240.445" y="0" z="-240.445" />
-                    <point x="-340" y="0" z="0" />
-                    <point x="-240.445" y="0" z="240.445" />
-                    <point x="0" y="0" z="340" />
-                    <point x="240.445" y="0" z="240.445" />
+                <translate time="120" align="true">
+                    <point x="300" y="0" z="0" />
+                    <point x="212.132" y="0" z="-212.132" />
+                    <point x="0" y="0" z="-300" />
+                    <point x="-212.132" y="0" z="-212.132" />
+                    <point x="-300" y="0" z="0" />
+                    <point x="-212.132" y="0" z="212.132" />
+                    <point x="0" y="0" z="300" />
+                    <point x="212.132" y="0" z="212.132" />
                 </translate>
 
-                <rotate time="50" x="0" y="1" z="0" />
-                <scale x="0.6" y="0.6" z="0.6" />
+                <rotate time="35" x="0" y="1" z="0" />
+                <scale x="0.65" y="0.65" z="0.65" />
             </transform>
             <models>
-                <model file="templateSphere.3d" />
-                <model file="templateTorus.3d" /> <!-- ./generator torus 20.0 6.0 24 2 templateTorus.3d  -->
+                <model file="saturn.3d" > <!-- ./bin/generator sphere 10 24 24 saturn.3d -->
+                    <texture file="saturn_SolarSystem.jpg" />
+                </model>
             </models>
             <!-- Moons of Saturn -->
             <group>
                 <!-- Titan -->
                 <transform>
                     <translate time="40" align="true">
-                        <point x="0" y="0" z="90" />
-                        <point x="90" y="0" z="0" />
-                        <point x="0" y="0" z="-90" />
-                        <point x="-90" y="0" z="0" />
+                        <point x="0" y="0" z="50" />
+                        <point x="50" y="0" z="0" />
+                        <point x="0" y="0" z="-50" />
+                        <point x="-50" y="0" z="0" />
                     </translate>
                     <rotate time="60" x="0" y="1" z="0" />
                     <scale x="0.25" y="0.25" z="0.25" />
                 </transform>
                 <models>
-                    <model file="templateSphere.3d" />
+                    <model file="titan.3d" > <!-- ./bin/generator sphere 10 24 24 titan.3d -->
+                        <texture file="moonExample2.jpg" />
+                    </model>
                 </models>
             </group>
         </group>
@@ -281,23 +326,24 @@
         <!-- Uranus -->
         <group>
             <transform>
-                <color r="1.0" g="1.0" b="1.0" />
-                <translate time="120" align="true">
-                    <point x="500" y="0" z="0" />
-                    <point x="353.553" y="0" z="-353.553" />
-                    <point x="0" y="0" z="-500" />
-                    <point x="-353.553" y="0" z="-353.553" />
-                    <point x="-500" y="0" z="0" />
-                    <point x="-353.553" y="0" z="353.553" />
-                    <point x="0" y="0" z="500" />
-                    <point x="353.553" y="0" z="353.553" />
+                <translate time="140" align="true">
+                    <point x="350" y="0" z="0" />
+                    <point x="247.488" y="0" z="-247.488" />
+                    <point x="0" y="0" z="-350" />
+                    <point x="-247.488" y="0" z="-247.488" />
+                    <point x="-350" y="0" z="0" />
+                    <point x="-247.488" y="0" z="247.488" />
+                    <point x="0" y="0" z="350" />
+                    <point x="247.488" y="0" z="247.488" />
                 </translate>
 
-                <rotate time="60" x="0" y="1" z="0" />
-                <scale x="0.35" y="0.35" z="0.35" />
+                <rotate time="40" x="0" y="1" z="0" />
+                <scale x="0.6" y="0.6" z="0.6" />
             </transform>
             <models>
-                <model file="templateSphere.3d" />
+                <model file="uranus.3d" > <!-- ./bin/generator sphere 10 24 24 uranus.3d -->
+                    <texture file="uranos_SolarSystem.jpg" />
+                </model>
             </models>
             <!-- Moons of Uranus -->
             <group>
@@ -313,7 +359,9 @@
                     <scale x="0.2" y="0.2" z="0.2" />
                 </transform>
                 <models>
-                    <model file="templateSphere.3d" />
+                    <model file="titania.3d" > <!-- ./bin/generator sphere 10 24 24 titania.3d -->
+                        <texture file="moonExample3.jpg" />
+                    </model>
                 </models>
             </group>
         </group>
@@ -321,23 +369,24 @@
         <!-- Neptune -->
         <group>
             <transform>
-                <color r="1.0" g="1.0" b="1.0" />
-                <translate time="140" align="true">
-                    <point x="640" y="0" z="0" />
-                    <point x="453.553" y="0" z="-453.553" />
-                    <point x="0" y="0" z="-640" />
-                    <point x="-453.553" y="0" z="-453.553" />
-                    <point x="-640" y="0" z="0" />
-                    <point x="-453.553" y="0" z="453.553" />
-                    <point x="0" y="0" z="640" />
-                    <point x="453.553" y="0" z="453.553" />
+                <translate time="160" align="true">
+                    <point x="400" y="0" z="0" />
+                    <point x="282.843" y="0" z="-282.843" />
+                    <point x="0" y="0" z="-400" />
+                    <point x="-282.843" y="0" z="-282.843" />
+                    <point x="-400" y="0" z="0" />
+                    <point x="-282.843" y="0" z="282.843" />
+                    <point x="0" y="0" z="400" />
+                    <point x="282.843" y="0" z="282.843" />
                 </translate>
 
-                <rotate time="70" x="0" y="1" z="0" />
-                <scale x="0.25" y="0.25" z="0.25" />
+                <rotate time="45" x="0" y="1" z="0" />
+                <scale x="0.55" y="0.55" z="0.55" />
             </transform>
             <models>
-                <model file="templateSphere.3d" />
+                <model file="neptune.3d" > <!-- ./bin/generator sphere 10 24 24 neptune.3d -->
+                    <texture file="neptune_SolarSystem.jpg" />
+                </model>
             </models>
             <!-- Moons of Neptune -->
             <group>
@@ -353,9 +402,13 @@
                     <scale x="0.15" y="0.15" z="0.15" />
                 </transform>
                 <models>
-                    <model file="templateSphere.3d" />
+                    <model file="triton.3d" > <!-- ./bin/generator sphere 10 24 24 triton.3d -->
+                        <texture file="moonExample3.jpg" />
+                    </model>
                 </models>
             </group>
         </group>
     </group>
 </world>
+
+
