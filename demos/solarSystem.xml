@@ -264,10 +264,10 @@
                 <!-- Europa -->
                 <transform>
                     <translate time="25" align="true">
-                        <point x="0" y="0" z="70" />
-                        <point x="70" y="0" z="0" />
-                        <point x="0" y="0" z="-70" />
-                        <point x="-70" y="0" z="0" />
+                        <point x="0" y="0" z="60" />
+                        <point x="60" y="0" z="0" />
+                        <point x="0" y="0" z="-60" />
+                        <point x="-60" y="0" z="0" />
                     </translate>
                     <rotate time="35" x="0" y="1" z="0" />
                     <scale x="0.12" y="0.12" z="0.12" />
@@ -300,6 +300,9 @@
             <models>
                 <model file="saturn.3d" > <!-- ./bin/generator sphere 10 24 24 saturn.3d -->
                     <texture file="saturn_SolarSystem.jpg" />
+                </model>
+                <model file="saturnRings.3d" > <!-- ./bin/generator torus 20.0 6.0 100 2 saturnRings.3d  -->
+                    <texture file="saturnRing_SolarSystem.jpg" />
                 </model>
             </models>
             <!-- Moons of Saturn -->
