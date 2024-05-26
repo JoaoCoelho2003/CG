@@ -47,27 +47,27 @@ void Cone::generateVertices() {
                 glm::vec3 center_bottom(0.0f, 0.0f, 0.0f);
 
                 vertices.push_back(v1);
-                vertices.push_back(v2);
                 vertices.push_back(center_bottom);
+                vertices.push_back(v2);
 
                 normals.push_back(normal_bottom);
                 normals.push_back(normal_bottom);
                 normals.push_back(normal_bottom);
 
                 texCoords.push_back(glm::vec2(v1.x / radius + 0.5f, v1.z / radius + 0.5f));
-                texCoords.push_back(glm::vec2(v2.x / radius + 0.5f, v2.z / radius + 0.5f));
                 texCoords.push_back(glm::vec2(0.5f, 0.5f));
+                texCoords.push_back(glm::vec2(v2.x / radius + 0.5f, v2.z / radius + 0.5f));
             }
 
             // Triangle 1
             vertices.push_back(v1);
-            vertices.push_back(v3);
             vertices.push_back(v2);
+            vertices.push_back(v3);
 
             // Triangle 2
             vertices.push_back(v1);
-            vertices.push_back(v4);
             vertices.push_back(v3);
+            vertices.push_back(v4);
 
             // Normals for each vertex
             glm::vec3 normal1 = glm::normalize(glm::vec3(v1.x, radius / height, v1.z));
@@ -76,12 +76,12 @@ void Cone::generateVertices() {
             glm::vec3 normal4 = glm::normalize(glm::vec3(v4.x, radius / height, v4.z));
 
             normals.push_back(normal1);
-            normals.push_back(normal3);
             normals.push_back(normal2);
+            normals.push_back(normal3);
 
             normals.push_back(normal1);
-            normals.push_back(normal4);
             normals.push_back(normal3);
+            normals.push_back(normal4);
 
             // Texture coordinates
             float s1 = (float)j / slices;
@@ -90,12 +90,12 @@ void Cone::generateVertices() {
             float t2 = (float)(i + 1) / stacks;
 
             texCoords.push_back(glm::vec2(s1, t1));
-            texCoords.push_back(glm::vec2(s2, t2));
             texCoords.push_back(glm::vec2(s2, t1));
-
-            texCoords.push_back(glm::vec2(s1, t1));
             texCoords.push_back(glm::vec2(s1, t2));
+
+            texCoords.push_back(glm::vec2(s2, t1));
             texCoords.push_back(glm::vec2(s2, t2));
+            texCoords.push_back(glm::vec2(s1, t2));
         }
     }
 }
