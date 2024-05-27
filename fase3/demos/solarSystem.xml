@@ -1,0 +1,361 @@
+<world>
+    <window width="800" height="600" />
+    <camera>
+        <position x="50" y="50" z="200" />
+        <lookAt x="0" y="0" z="0" />
+        <up x="0" y="1" z="0" />
+        <projection fov="60" near="1" far="1000" />
+    </camera>
+
+    <group>
+        <!-- Sun -->
+        <transform>
+            <color r="1.0" g="0.7" b="0.0" />
+            <translate x="0" y="0" z="0" />
+            <scale x="1.0" y="1.0" z="1.0" />
+        </transform>
+        <models>
+            <model file="templateSphere.3d" /> <!-- ./generator sphere 10 24 24 templateSphere.3d -->
+        </models>
+
+        <!-- Asteroid -->
+        <group>
+            <transform>
+                <color r="1.0" g="1.0" b="1.0" />
+                <translate time="20" align="true">
+                    <point x="50" y="0" z="0" />
+                    <point x="20" y="0" z="-90" />
+                    <point x="-50" y="0" z="0" />
+                    <point x="-20" y="0" z="90" />
+                </translate>
+                <color r="0.0" g="0.0" b="1.0" />
+                <rotate time="20" x="0" y="1" z="0" />
+                <scale x="0.4" y="0.4" z="0.4" />
+            </transform>
+            <models>
+                <model file="bezier_10.3d" /> <!-- ./generator patch teapot.patch 10 bezier_10.3d -->
+            </models>
+        </group>
+
+        <!-- Mercury -->
+        <group>
+            <transform>
+                <color r="1.0" g="1.0" b="1.0" />
+                <translate time="20" align="true">
+                    <point x="70" y="0" z="0" />
+                    <point x="49.497" y="0" z="-49.497" />
+                    <point x="0" y="0" z="-70" />
+                    <point x="-49.497" y="0" z="-49.497" />
+                    <point x="-70" y="0" z="0" />
+                    <point x="-49.497" y="0" z="49.497" />
+                    <point x="0" y="0" z="70" />
+                    <point x="49.497" y="0" z="49.497" />
+                </translate>
+
+                <rotate time="10" x="0" y="1" z="0" />
+                <scale x="0.2" y="0.2" z="0.2" />
+            </transform>
+            <models>
+                <model file="templateSphere.3d" />
+            </models>
+        </group>
+
+        <!-- Venus -->
+        <group>
+            <transform>
+                <color r="1.0" g="1.0" b="1.0" />
+                <translate time="30" align="true">
+                    <point x="100" y="0" z="0" />
+                    <point x="70" y="0" z="-70" />
+                    <point x="0" y="0" z="-100" />
+                    <point x="-70" y="0" z="-70" />
+                    <point x="-100" y="0" z="0" />
+                    <point x="-70" y="0" z="70" />
+                    <point x="0" y="0" z="100" />
+                    <point x="70" y="0" z="70" />
+                </translate>
+                <rotate time="15" x="0" y="1" z="0" />
+                <scale x="0.3" y="0.3" z="0.3" />
+            </transform>
+            <models>
+                <model file="templateSphere.3d" />
+            </models>
+        </group>
+
+
+        <!-- Earth -->
+        <group>
+            <transform>
+                <color r="1.0" g="1.0" b="1.0" />
+                <translate time="50" align="true">
+                    <point x="140" y="0" z="0" />
+                    <point x="100" y="0" z="-100" />
+                    <point x="0" y="0" z="-140" />
+                    <point x="-100" y="0" z="-100" />
+                    <point x="-140" y="0" z="-0" />
+                    <point x="-100" y="0" z="100" />
+                    <point x="0" y="0" z="140" />
+                    <point x="100" y="0" z="100" />
+                </translate>
+
+                <rotate time="20" x="0" y="1" z="0" />
+                <scale x="0.4" y="0.4" z="0.4" />
+            </transform>
+            <models>
+                <model file="templateSphere.3d" />
+            </models>
+            <!-- Moon -->
+            <group>
+                <transform>
+                    <translate time="30" align="true">
+                        <point x="15" y="0" z="15" />
+                        <point x="21.213" y="0" z="0" />
+                        <point x="15" y="0" z="-15" />
+                        <point x="-15" y="0" z="-15" />
+                        <point x="-21.213" y="0" z="0" />
+                        <point x="-15" y="0" z="15" />
+                    </translate>
+                    <rotate time="40" x="0" y="1" z="0" />
+                    <scale x="0.05" y="0.05" z="0.05" />
+                </transform>
+
+                <models>
+                    <model file="templateSphere.3d" />
+                </models>
+            </group>
+        </group>
+
+        <!-- Mars -->
+        <group>
+            <transform>
+                <color r="1.0" g="1.0" b="1.0" />
+                <translate time="70" align="true">
+                    <point x="180" y="0" z="0" />
+                    <point x="127.279" y="0" z="-127.279" />
+                    <point x="0" y="0" z="-180" />
+                    <point x="-127.279" y="0" z="-127.279" />
+                    <point x="-180" y="0" z="0" />
+                    <point x="-127.279" y="0" z="127.279" />
+                    <point x="0" y="0" z="180" />
+                    <point x="127.279" y="0" z="127.279" />
+                </translate>
+
+                <rotate time="25" x="0" y="1" z="0" />
+                <scale x="0.5" y="0.5" z="0.5" />
+            </transform>
+            <models>
+                <model file="templateSphere.3d" />
+            </models>
+            <!-- Moons of Mars -->
+            <group>
+                <!-- Phobos -->
+                <transform>
+                    <translate time="20" align="true">
+                        <point x="0" y="0" z="15" />
+                        <point x="15" y="0" z="0" />
+                        <point x="0" y="0" z="-15" />
+                        <point x="-15" y="0" z="0" />
+                    </translate>
+                    <rotate time="30" x="0" y="1" z="0" />
+                    <scale x="0.1" y="0.1" z="0.1" />
+                </transform>
+                <models>
+                    <model file="templateSphere.3d" />
+                </models>
+            </group>
+            <group>
+                <!-- Deimos -->
+                <transform>
+                    <translate time="15" align="true">
+                        <point x="0" y="0" z="20" />
+                        <point x="20" y="0" z="0" />
+                        <point x="0" y="0" z="-20" />
+                        <point x="-20" y="0" z="0" />
+                    </translate>
+                    <rotate time="25" x="0" y="1" z="0" />
+                    <scale x="0.08" y="0.08" z="0.08" />
+                </transform>
+                <models>
+                    <model file="templateSphere.3d" />
+                </models>
+            </group>
+        </group>
+
+        <!-- Jupiter -->
+        <group>
+            <transform>
+                <color r="1.0" g="1.0" b="1.0" />
+                <translate time="80" align="true">
+                    <point x="240" y="0" z="0" />
+                    <point x="169.705" y="0" z="-169.705" />
+                    <point x="0" y="0" z="-240" />
+                    <point x="-169.705" y="0" z="-169.705" />
+                    <point x="-240" y="0" z="0" />
+                    <point x="-169.705" y="0" z="169.705" />
+                    <point x="0" y="0" z="240" />
+                    <point x="169.705" y="0" z="169.705" />
+                </translate>
+
+                <rotate time="35" x="0" y="1" z="0" />
+                <scale x="0.7" y="0.7" z="0.7" />
+            </transform>
+            <models>
+                <model file="templateSphere.3d" />
+            </models>
+            <!-- Moons of Jupiter -->
+            <group>
+                <!-- Io -->
+                <transform>
+                    <translate time="30" align="true">
+                        <point x="0" y="0" z="45" />
+                        <point x="45" y="0" z="0" />
+                        <point x="0" y="0" z="-45" />
+                        <point x="-45" y="0" z="0" />
+                    </translate>
+                    <rotate time="40" x="0" y="1" z="0" />
+                    <scale x="0.15" y="0.15" z="0.15" />
+                </transform>
+                <models>
+                    <model file="templateSphere.3d" />
+                </models>
+            </group>
+            <group>
+                <!-- Europa -->
+                <transform>
+                    <translate time="25" align="true">
+                        <point x="0" y="0" z="70" />
+                        <point x="70" y="0" z="0" />
+                        <point x="0" y="0" z="-70" />
+                        <point x="-70" y="0" z="0" />
+                    </translate>
+                    <rotate time="35" x="0" y="1" z="0" />
+                    <scale x="0.12" y="0.12" z="0.12" />
+                </transform>
+                <models>
+                    <model file="templateSphere.3d" />
+                </models>
+            </group>
+        </group>
+
+        <!-- Saturn -->
+        <group>
+            <transform>
+                <color r="1.0" g="1.0" b="1.0" />
+                <translate time="100" align="true">
+                    <point x="340" y="0" z="0" />
+                    <point x="240.445" y="0" z="-240.445" />
+                    <point x="0" y="0" z="-340" />
+                    <point x="-240.445" y="0" z="-240.445" />
+                    <point x="-340" y="0" z="0" />
+                    <point x="-240.445" y="0" z="240.445" />
+                    <point x="0" y="0" z="340" />
+                    <point x="240.445" y="0" z="240.445" />
+                </translate>
+
+                <rotate time="50" x="0" y="1" z="0" />
+                <scale x="0.6" y="0.6" z="0.6" />
+            </transform>
+            <models>
+                <model file="templateSphere.3d" />
+                <model file="templateTorus.3d" /> <!-- ./generator torus 20.0 6.0 24 2 templateTorus.3d  -->
+            </models>
+            <!-- Moons of Saturn -->
+            <group>
+                <!-- Titan -->
+                <transform>
+                    <translate time="40" align="true">
+                        <point x="0" y="0" z="90" />
+                        <point x="90" y="0" z="0" />
+                        <point x="0" y="0" z="-90" />
+                        <point x="-90" y="0" z="0" />
+                    </translate>
+                    <rotate time="60" x="0" y="1" z="0" />
+                    <scale x="0.25" y="0.25" z="0.25" />
+                </transform>
+                <models>
+                    <model file="templateSphere.3d" />
+                </models>
+            </group>
+        </group>
+
+        <!-- Uranus -->
+        <group>
+            <transform>
+                <color r="1.0" g="1.0" b="1.0" />
+                <translate time="120" align="true">
+                    <point x="500" y="0" z="0" />
+                    <point x="353.553" y="0" z="-353.553" />
+                    <point x="0" y="0" z="-500" />
+                    <point x="-353.553" y="0" z="-353.553" />
+                    <point x="-500" y="0" z="0" />
+                    <point x="-353.553" y="0" z="353.553" />
+                    <point x="0" y="0" z="500" />
+                    <point x="353.553" y="0" z="353.553" />
+                </translate>
+
+                <rotate time="60" x="0" y="1" z="0" />
+                <scale x="0.35" y="0.35" z="0.35" />
+            </transform>
+            <models>
+                <model file="templateSphere.3d" />
+            </models>
+            <!-- Moons of Uranus -->
+            <group>
+                <!-- Titania -->
+                <transform>
+                    <translate time="50" align="true">
+                        <point x="0" y="0" z="110" />
+                        <point x="110" y="0" z="0" />
+                        <point x="0" y="0" z="-110" />
+                        <point x="-110" y="0" z="0" />
+                    </translate>
+                    <rotate time="70" x="0" y="1" z="0" />
+                    <scale x="0.2" y="0.2" z="0.2" />
+                </transform>
+                <models>
+                    <model file="templateSphere.3d" />
+                </models>
+            </group>
+        </group>
+
+        <!-- Neptune -->
+        <group>
+            <transform>
+                <color r="1.0" g="1.0" b="1.0" />
+                <translate time="140" align="true">
+                    <point x="640" y="0" z="0" />
+                    <point x="453.553" y="0" z="-453.553" />
+                    <point x="0" y="0" z="-640" />
+                    <point x="-453.553" y="0" z="-453.553" />
+                    <point x="-640" y="0" z="0" />
+                    <point x="-453.553" y="0" z="453.553" />
+                    <point x="0" y="0" z="640" />
+                    <point x="453.553" y="0" z="453.553" />
+                </translate>
+
+                <rotate time="70" x="0" y="1" z="0" />
+                <scale x="0.25" y="0.25" z="0.25" />
+            </transform>
+            <models>
+                <model file="templateSphere.3d" />
+            </models>
+            <!-- Moons of Neptune -->
+            <group>
+                <!-- Triton -->
+                <transform>
+                    <translate time="60" align="true">
+                        <point x="0" y="0" z="140" />
+                        <point x="140" y="0" z="0" />
+                        <point x="0" y="0" z="-140" />
+                        <point x="-140" y="0" z="0" />
+                    </translate>
+                    <rotate time="80" x="0" y="1" z="0" />
+                    <scale x="0.15" y="0.15" z="0.15" />
+                </transform>
+                <models>
+                    <model file="templateSphere.3d" />
+                </models>
+            </group>
+        </group>
+    </group>
+</world>

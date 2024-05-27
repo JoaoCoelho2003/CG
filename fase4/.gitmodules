@@ -1,0 +1,9 @@
+[submodule "libraries/glm"]
+	path = libraries/glm
+	url = https://github.com/icaven/glm.git
+[submodule "libraries/tinyxml2"]
+	path = libraries/tinyxml2
+	url = https://github.com/leethomason/tinyxml2.git
+[submodule "libraries/glew"]
+	path = libraries/glew
+	url = git@github.com:nigels-com/glew.git

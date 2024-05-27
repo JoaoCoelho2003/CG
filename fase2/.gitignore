@@ -1,0 +1,25 @@
+# Ignore build artifacts
+/build/
+*.o
+*.out
+*.exe
+*.3d
+engine
+generator
+# Ignore IDE and editor specific files
+/CG/.vscode/
+/CG/.idea/
+/CG/*.suo
+/CG/*.user
+/CG/*.sln
+/CG/*.suo
+/CG/*.user
+/CG/*.ncb
+/CG/*.opendb
+/CG/*.sdf
+/CG/*.cproject
+/CG/*.project
+/CG/*.workspace
+
+# Ignore dependency directories
+/CG/vendor/
