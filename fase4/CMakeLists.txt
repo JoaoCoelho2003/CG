@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 # Project Name
-project(class2)
+project(CG)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -14,8 +14,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIRS})
-link_directories(${OPENGL_LIBRARY_DIRS})
-add_definitions(${OPENGL_DEFINITIONS})
 
 if(NOT OPENGL_FOUND)
     message(FATAL_ERROR "OPENGL not found!")
@@ -30,8 +28,8 @@ if(WIN32)
     endif(NOT EXISTS "${TOOLKITS_FOLDER}/glut/GL/glut.h" OR NOT EXISTS "${TOOLKITS_FOLDER}/glut/glut32.lib")    
     
     include_directories(${TOOLKITS_FOLDER}/glut)
-    target_link_libraries(engine ${OPENGL_LIBRARIES} ${TOOLKITS_FOLDER}/glut/glut32.lib)
-    target_link_libraries(generator ${OPENGL_LIBRARIES} ${TOOLKITS_FOLDER}/glut/glut32.lib)
+    target_link_libraries(engine ${OPENGL_LIBRARIES} ${TOOLKITS_FOLDER}/glut/glut32.lib tinyxml2 GLEW)
+    target_link_libraries(generator ${OPENGL_LIBRARIES} ${TOOLKITS_FOLDER}/glut/glut32.lib tinyxml2 GLEW)
     
     if(EXISTS "${TOOLKITS_FOLDER}/glut/glut32.dll")
         file(COPY ${TOOLKITS_FOLDER}/glut/glut32.dll DESTINATION ${CMAKE_BINARY_DIR})
@@ -44,17 +42,13 @@ else(WIN32) # Linux and Mac
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated")
     find_package(GLUT REQUIRED)
     include_directories(${GLUT_INCLUDE_DIR})
-    link_directories(${GLUT_LIBRARY_DIRS})
-    add_definitions(${GLUT_DEFINITIONS})
-
-    set(TOOLKITS_FOLDER "/usr/lib/x86_64-linux-gnu/")
-    
-    target_link_libraries(engine ${OPENGL_LIBRARIES} ${TOOLKITS_FOLDER}/libglut.so tinyxml2 GLEW)
-    target_link_libraries(generator ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
     
     if(NOT GLUT_FOUND)
-       message(FATAL_ERROR "GLUT not found!")
+        message(FATAL_ERROR "GLUT not found!")
     endif(NOT GLUT_FOUND)
+    
+    target_link_libraries(engine ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} tinyxml2 GLEW)
+    target_link_libraries(generator ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} tinyxml2 GLEW)
     
 endif(WIN32) # End of WIN32 check
 
